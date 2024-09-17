@@ -34,7 +34,7 @@ class Lecture:
             Analyze the given lecture document/presentation and provide:
 
             1. A concise yet comprehensive overview (2-3 sentences)
-            2. A list of 5-7 key topics covered, in order of appearance
+            2. A list of 5-7 key topics covered, in order of appearance. Give a brief explanation for each topic.
 
             Ensure the overview captures the main theme and purpose of the lecture. For topics, use clear and specific phrases rather than broad categories.
             """
@@ -240,7 +240,23 @@ class Lecture:
             "top_p": 0.95,
             "top_k": 64,
             "max_output_tokens": 8192,
-            "response_mime_type": "text/plain",
+            "response_schema": content.Schema(
+                    type = content.Type.ARRAY,
+                    items = content.Schema(
+                    type = content.Type.OBJECT,
+                    required = ["term", "definition"],
+                    properties = {
+                        "term": content.Schema(
+                        type = content.Type.STRING,
+                        ),
+                        "definition": content.Schema(
+                        type = content.Type.STRING,
+                        ),
+                    },
+                    ),
+                ),
+
+            "response_mime_type": "application/json",
         }
             
         model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=generation_config)
@@ -259,4 +275,12 @@ class Lecture:
         Ensure the glossary covers the most crucial vocabulary and ideas a student would need to understand the lecture material.
         """
                 
-        return client.generate_content(model, prompt, uploaded_files)
+        response = client.generate_content(model, prompt, uploaded_files)
+            # Convert JSON response to Python object
+        try:
+            python_obj = json.loads(response)
+            return python_obj
+
+        except json.JSONDecodeError:
+            print("Error: Unable to parse JSON response")
+            return None

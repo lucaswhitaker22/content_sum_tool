@@ -11,15 +11,9 @@ from datetime import date, timedelta
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-content_args_list = [
-    {
-        "format": "Lecture",
-        "date": date.today()- timedelta(days=7),
-        "course":"SYSC 4101",
-        "title":"Definitions 1",
-        "path":"input/SYSC4101-5105_Definitions_PI.pdf"
-    },
-    {
+
+'''
+  {
         "format": "Lecture",
         "date": date.today()- timedelta(days=4),
         "course":"SYSC 4101",
@@ -33,7 +27,18 @@ content_args_list = [
         "title":"Input Domain",
         "path":"input/SYSC4101-5105_Definitions_PII.pdf"
     }
+'''
+content_args_list = [
+    {
+        "format": "Lecture",
+        "date": date.today()- timedelta(days=7),
+        "course":"SYSC 4101",
+        "title":"Definitions 1",
+        "path":"input/SYSC4101-5105_Definitions_PI.pdf"
+    }
 ]
+
+
 
 def generate_lecture(client, content, uploaded_files):
     logger.info(f"Generating lecture for {content['title']}")
@@ -73,6 +78,21 @@ def generate_lecture(client, content, uploaded_files):
 
 def gen_html(data):
     logger.info(f"Generating HTML for {data['metadata']['title']}")
+    
+    # Generate HTML for topics
+    topics_html = ""
+    if isinstance(data['metadata']['topics'], list):
+        topics_html = '<ul>' + ''.join(f'<li>{topic}</li>' for topic in data['metadata']['topics']) + '</ul>'
+    else:
+        topics_html = str(data['metadata']['topics'])  # fallback to string representation
+
+    # Generate HTML for keywords
+    keywords_html = "<dl>"
+    for keyword in data['keywords']:
+        keywords_html += f"<dt><strong>{keyword['term']}</strong></dt>"
+        keywords_html += f"<dd>{keyword['definition']}</dd>"
+    keywords_html += "</dl>"
+
     html = f"""
     <html>
     <head>
@@ -132,6 +152,17 @@ def gen_html(data):
                 margin-bottom: 20px;
                 border-radius: 5px;
             }}
+            dl {{
+                margin-left: 20px;
+            }}
+            dt {{
+                font-weight: bold;
+                margin-top: 10px;
+            }}
+            dd {{
+                margin-left: 20px;
+                margin-bottom: 10px;
+            }}
         </style>
     </head>
     <body>
@@ -139,7 +170,8 @@ def gen_html(data):
         <p><strong>Course:</strong> {data['metadata']['course']}</p>
         <p><strong>Date:</strong> {data['metadata']['date']}</p>
         <p><strong>Overview:</strong> {data['metadata']['overview']}</p>
-
+        <p><strong>Topics:</strong></p>
+        {topics_html}
         <button class="collapsible">Lecture Notes</button>
         <div class="content">
             {markdown.markdown(data['notes'])}
@@ -147,7 +179,7 @@ def gen_html(data):
 
         <button class="collapsible">Keywords and Definitions</button>
         <div class="content">
-            {markdown.markdown(data['keywords'])}
+            {keywords_html}
         </div>
 
         <button class="collapsible">Review Questions</button>
@@ -215,7 +247,6 @@ def gen_html(data):
 
     logger.info(f"HTML generation completed for {data['metadata']['title']}")
     return html
-
 def output_to_html_and_json(data, output_path):
     # Ensure the output directory exists for JSON
     json_output_path = output_path.replace('.html', '.json').replace('/output/', '/output/json/')
