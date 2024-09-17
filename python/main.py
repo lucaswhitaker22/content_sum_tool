@@ -1,14 +1,9 @@
 
 import os
 from client import Client
-from datetime import date
 from generate_lecture import Lecture
 import markdown
-import os
-from client import Client
-from datetime import date
-from generate_lecture import Lecture
-import markdown
+import json
 import logging
 from datetime import date, timedelta
 
@@ -36,7 +31,7 @@ content_args_list = [
         "date": date.today(),
         "course":"SYSC 4101",
         "title":"Input Domain",
-        "path":"input/SYSC4101-5105_InputDomainTesting_PI.pdf"
+        "path":"input/SYSC4101-5105_Definitions_PII.pdf"
     }
 ]
 
@@ -159,8 +154,8 @@ def gen_html(data):
         <div class="content">
     """
     
-    if 'review' in data and 'review' in data['review']:
-        for qa in data['review']['review']:
+    if 'review' in data:
+        for qa in data['review']:
             html += f"<h3>Q: {qa['question']}</h3>"
             html += f"<p>A: {qa['answer']}</p>"
     
@@ -197,10 +192,10 @@ def gen_html(data):
 
     logger.info(f"HTML generation completed for {data['metadata']['title']}")
     return html
-
-def output_to_html(data, output_path):
-    # Ensure the output directory exists
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+def output_to_html_and_json(data, output_path):
+    # Ensure the output directory exists for JSON
+    json_output_path = output_path.replace('.html', '.json').replace('/output/', '/output/json/')
+    os.makedirs(os.path.dirname(json_output_path), exist_ok=True)
     
     # Generate HTML content
     html_content = gen_html(data)
@@ -209,7 +204,28 @@ def output_to_html(data, output_path):
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-    print(f"HTML file created: {output_path}")
+    # Prepare data for JSON serialization
+    json_data = {
+        'metadata': {
+            'overview': data['metadata']['overview'],
+            'topics': data['metadata']['topics'],
+            'format': data['metadata']['format'],
+            'date': data['metadata']['date'].isoformat(),
+            'course': data['metadata']['course'],
+            'title': data['metadata']['title'],
+            'path': data['metadata']['path']
+        },
+        'notes': data['notes'],
+        'review': data['review'],
+        'keywords': data['keywords']
+    }
+
+    # Write the data to a JSON file
+    with open(json_output_path, 'w', encoding='utf-8') as json_file:
+        json.dump(json_data, json_file, ensure_ascii=False, indent=4)
+
+    print(f'HTML file created: {output_path}')
+    print(f'JSON file created: {json_output_path}')
 
 def main():
     api_key = "AIzaSyDlgPeD6BZ16dVTn9xiKl_vq41U1gzNENI"
@@ -225,8 +241,8 @@ def main():
             case 'Lecture':
                 data = generate_lecture(client, content_args, uploaded_file)
                 output_path = f"output/{data['metadata']['course']}/{data['metadata']['format']}/{data['metadata']['title']}.html"
-                output_to_html(data, output_path)
-                logger.info(f"Saved HTML to {output_path}")
+                output_to_html_and_json(data, output_path)
+                logger.info(f"Saved HTML and JSON files")
 
     logger.info("Lecture generation process completed")
 

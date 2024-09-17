@@ -1,0 +1,397 @@
+
+    <html>
+    <head>
+        <title>Definitions 1</title>
+        <style>
+            body { 
+                font-family: Arial, sans-serif; 
+                line-height: 1.6; 
+                padding: 20px; 
+                background-color: #f9f9f9; 
+                color: #333; 
+            }
+            h1 { 
+                text-align: center; 
+                color: #4CAF50; 
+            }
+            h2, h3 { 
+                color: #333; 
+                margin-top: 20px; 
+            }
+            p { 
+                margin: 10px 0; 
+            }
+            .collapsible { 
+                background-color: #4CAF50; 
+                color: white; 
+                cursor: pointer; 
+                padding: 15px; 
+                width: 100%; 
+                border: none; 
+                text-align: left; 
+                outline: none; 
+                font-size: 16px; 
+                border-radius: 5px;
+                transition: background-color 0.3s;
+            }
+            .collapsible:hover { 
+                background-color: #45a049; 
+            }
+            .collapsible:after {
+                content: '\002B';
+                color: white;
+                font-weight: bold;
+                float: right;
+                margin-left: 5px;
+            }
+            .active:after {
+                content: "\2212";
+            }
+            .content {
+                padding: 0 15px;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.2s ease-out;
+                background-color: #e7f3fe;
+                border-left: 5px solid #4CAF50;
+                margin-bottom: 20px;
+                border-radius: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Definitions 1</h1>
+        <p><strong>Course:</strong> SYSC 4101</p>
+        <p><strong>Date:</strong> 2024-09-10</p>
+        <p><strong>Overview:</strong> This lecture, part of the SYSC4101/SYSC5105 course, introduces fundamental concepts in software testing, focusing on defining and understanding the difference between a fault, an error, and a failure. The lecture also emphasizes the importance of observability and controllability in testing, explaining how they relate to reaching faults, infecting states, and propagating errors.</p>
+
+        <button class="collapsible">Lecture Notes</button>
+        <div class="content">
+            <h1>SYSC4101 / SYSC5105: Definitions - Part I</h1>
+<h2>What are we looking for?</h2>
+<ul>
+<li><strong>Fault:</strong> A defect in a system.  Humans commit faults.<ul>
+<li>Example: A faulty statement in code.</li>
+</ul>
+</li>
+<li><strong>Error:</strong>  An unexpected state reached at runtime due to a fault.<ul>
+<li>Example: An erroneous state in a variable.</li>
+</ul>
+</li>
+<li><strong>Failure:</strong> The delivered service deviates from its intended behavior. </li>
+</ul>
+<p><strong>Important</strong>: The term "bug" is not used in SYSC4101. </p>
+<p><strong>Relationship:</strong> Fault → Error → Failure</p>
+<p><strong>Three conditions for a failure to be observed:</strong></p>
+<ul>
+<li><strong>Reachability:</strong> The location(s) in the program containing the fault must be reached.</li>
+<li><strong>Infection:</strong> The state of the program must be incorrect.</li>
+<li><strong>Propagation:</strong> The infected state must propagate to cause an incorrect output.</li>
+</ul>
+<p><strong>All three conditions are necessary for a failure to occur.</strong></p>
+<ul>
+<li>Reaching the fault alone is not sufficient. There may not be any infection, and the delivered service may not be affected. </li>
+<li>Infecting the state alone is not sufficient. The delivered service may not be affected.</li>
+</ul>
+<h2>Observability vs. Controllability</h2>
+<ul>
+<li>
+<p><strong>Software Observability:</strong> How easy it is to observe a program's behavior in terms of its outputs and effects on the environment and other hardware/software components.</p>
+<ul>
+<li>Observability is <strong>low</strong> for software affecting hardware devices, databases, or remote files.</li>
+<li><strong>Observability relates to Propagation.</strong></li>
+</ul>
+</li>
+<li>
+<p><strong>Software Controllability:</strong> How easy it is to provide a program with the needed inputs, operations, and behaviors.</p>
+<ul>
+<li>Controllability is <strong>high</strong> for software with inputs from keyboards. </li>
+<li>Controllability is <strong>low</strong> for software with inputs from hardware sensors or distributed software. </li>
+<li><strong>Data abstraction reduces both controllability and observability.</strong> </li>
+<li><strong>Controllability relates to Reachability and Infection.</strong></li>
+</ul>
+</li>
+</ul>
+<h2>Test Scaffolding / Test Harness</h2>
+<ul>
+<li>
+<p><strong>Infrastructure (software and/or hardware) for executing test cases.</strong></p>
+</li>
+<li>
+<p><strong>Key Components:</strong></p>
+<ul>
+<li><strong>Test Driver:</strong> A software component or test tool that replaces a component and controls the calling of a software component. The test driver executes a test case (one execution of the system under test with input values) or a test suite/set (a set of test cases).</li>
+<li><strong>Test Stub (a.k.a. mock):</strong> A skeletal or special-purpose implementation of a software module used to develop or test a component that calls the stub. The stub replaces a called component. <ul>
+<li>Example: Simulates a piece of code that is not yet ready.</li>
+</ul>
+</li>
+<li><strong>Test Oracle:</strong> Assists in deciding whether a test outcome is successful or not. It evaluates the outcome (pass/fail) by comparing the actual output with the expected output.<ul>
+<li><strong>Two important tasks of the test oracle:</strong><ol>
+<li>Comparing the actual output against the expected output. (Often done by software.)</li>
+<li>Deciding what the expected output is, given the test inputs of a test case. (Often done by humans.)</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Stubs and drivers enable components to be isolated from the rest of the system for testing purposes.</strong></p>
+<h2>Putting Things Together</h2>
+<p><strong>Diagram:</strong></p>
+<p>[Diagram depicting a test harness, showing the relationship between the driver, stub(s), program under test, oracle, test inputs, and outputs.]</p>
+<h2>A Simple Example</h2>
+<p><strong>Code:</strong></p>
+<p>```c</p>
+<h1>include “mySquareRoot.h”</h1>
+<p>int root(double a, double b, double c, double <em>root1, double </em>root2) {
+    double determinant = b<em>b-4</em>a<em>c;
+    if (determinant &gt; 0) {
+        </em>root1 = (-b+mySquareRoot(determinant))/(2<em>a);
+        </em>root2 = (-b-mySquareRoot(determinant))/(2<em>a);
+        return 1;
+    } else if (determinant == 0) {
+        </em>root1 = <em>root2 = -b/(2</em>a);
+        return 1;
+    } else {
+        return 0;
+    }
+}
+```</p>
+<p><strong>Scenario:</strong></p>
+<ul>
+<li>You want to test the <code>root()</code> function. </li>
+<li>The <code>mySquareRoot()</code> function is not yet available.</li>
+</ul>
+<p><strong>Solution:</strong></p>
+<ul>
+<li><strong>Stub <code>mySquareRoot()</code>:</strong></li>
+</ul>
+<p>```c
+// file mySquareRoot-Stub.c</p>
+<h1>include "mySquareRoot.h"</h1>
+<h1>include "stubFormySquareRoot.h"</h1>
+<p>static double valueToReturn;</p>
+<p>double mySquareRoot(double n) {
+    return valueToReturn;
+}</p>
+<p>void setReturnValue(double r) {
+    valueToReturn = r;
+}
+```</p>
+<ul>
+<li><strong>Test Driver:</strong></li>
+</ul>
+<p>```c</p>
+<h1>include "root.h"</h1>
+<h1>include "stubFormySquareRoot.h"</h1>
+<p>int main() {
+    double a, b, c, root1, root2;
+    int result;
+    double expectedRoot1, expectedRoot2;
+    double epsilon = 0.000001;</p>
+<pre><code>// test case 1
+setReturnValue(5); //instructing the stub what to respond to root()
+a = -2; b = 1; c = 3;
+expectedRoot1 = -1; expectedRoot2 = 1.5;
+result = root(a, b, c, &amp;root1, &amp;root2);
+if ((result==1) &amp;&amp; (fabs(expectedRoot1-root1)&lt;epsilon) &amp;&amp;
+(fabs(expectedRoot2-root2)&lt;epsilon) ) printf("test case 1 passes.\n");
+else printf("test case 1 fails.\n");
+</code></pre>
+<p>}
+```</p>
+<p><strong>Compiling and executing the test:</strong></p>
+<p><code>bash
+cc -c mySquareRoot-Stub.c
+cc -c root.c
+cc -c root-UnitTestWithStub.c
+cc mySquareRoot-Stub.o root.o root-UnitTestWithStub.o -o root-UnitTestWithStubs
+./root-UnitTestWithStubs</code></p>
+<p><strong>Compiling and running the program with all components:</strong></p>
+<p><code>bash
+cc -c mySquareRoot.c
+cc -c root.c
+cc -c quadratic.c
+cc mySquareRoot.o root.o quadratic.o -o quadratic
+./quadratic</code></p>
+<h2>Automated Test Infrastructure</h2>
+<ul>
+<li><strong>Familiar tools:</strong> JUnit, Google's C++ xUnit</li>
+<li><strong>Less familiar tools:</strong> TTCN-3 (organization-specific set up)</li>
+</ul>
+<p><strong>What changes in automated testing?</strong></p>
+<ul>
+<li><strong>The syntax</strong></li>
+</ul>
+<p><strong>What does not change in automated testing?</strong></p>
+<ul>
+<li>You still need to decide what inputs and outputs to choose for your tests. </li>
+</ul>
+        </div>
+
+        <button class="collapsible">Keywords and Definitions</button>
+        <div class="content">
+            <h1>Glossary of Key Terms and Concepts</h1>
+<p>This glossary provides definitions for key terms and concepts presented in the lecture document. </p>
+<ul>
+<li><strong>Controllability</strong>:  The ease of providing a program with the needed inputs (values, operations, and behaviors) to reach a specific state. This relates to the <strong>Reachability</strong> and <strong>Infection</strong> aspects of fault detection.</li>
+<li><strong>Error</strong>: An unexpected state of the system that occurs at runtime due to the activation of a <strong>Fault</strong>.</li>
+<li><strong>Fault</strong>: A defect in a system that, when activated, can lead to an <strong>Error</strong>. Often referred to as a "bug" historically.</li>
+<li><strong>Failure</strong>: A deviation of the delivered service from the intended behavior of the system. Occurs when a <strong>Fault</strong> leads to an <strong>Error</strong> that propagates to an observable outcome.</li>
+<li><strong>Infection</strong>: The state of the program being incorrect due to the activation of a <strong>Fault</strong>. This is one of the conditions needed for a <strong>Failure</strong> to occur.</li>
+<li><strong>Observability</strong>:  The ease of observing a program's behavior in terms of its outputs, effects on the environment, and interactions with other software and hardware components. This relates to the <strong>Propagation</strong> aspect of fault detection.</li>
+<li><strong>Oracle</strong>: A component that assists in determining whether a test outcome is successful or not. It compares actual outputs with expected outputs and decides the verdict (pass/fail). </li>
+<li><strong>Propagation</strong>: The infected state caused by a <strong>Fault</strong> propagating to cause some output of the program to be observed as incorrect. This is one of the conditions needed for a <strong>Failure</strong> to occur.</li>
+<li><strong>Reachability</strong>:  The ability to reach the location(s) in the program where the <strong>Fault</strong> resides. This is one of the conditions needed for a <strong>Failure</strong> to occur.</li>
+<li><strong>Stub</strong>: A skeletal or special-purpose implementation of a software module used to develop or test a component that calls the stub. It replaces a called component and often simulates code that is not yet ready.</li>
+<li><strong>Test Driver</strong>: A software component or test tool that replaces a component that takes care of the control and/or calling of a software component. It executes a test case or test suite.</li>
+<li><strong>Test Harness</strong>: The infrastructure (software and/or hardware) used to execute test cases. It includes test drivers, stubs, and oracles.</li>
+<li><strong>Test Scaffolding</strong>:  A synonym for Test Harness.</li>
+</ul>
+        </div>
+
+        <button class="collapsible">Review Questions</button>
+        <div class="content">
+    <h3>Q: What is a 'fault' in the context of software systems, and provide an example?</h3><p>A: A **fault** is a defect in a system, representing a mistake in the software's design or implementation. For example, a faulty statement in the code could lead to incorrect behavior.</p><h3>Q: Describe what an 'error' is in software systems, and give an example.</h3><p>A: An **error** occurs at runtime when the system enters an unexpected state due to the activation of a fault.  Imagine a program trying to divide by zero – this would be an error triggered by a fault in the code.</p><h3>Q: Define 'failure' in the context of software systems and give a real-world scenario.</h3><p>A: A **failure** occurs when the system's delivered service deviates from its intended behavior. If a website crashes and users cannot access it, that's a failure resulting from underlying faults or errors.</p><h3>Q: What does 'observability' refer to in software systems? Provide an example where observability would be lower.</h3><p>A: **Observability** measures how easy it is to understand the behavior of a program based on its outputs and effects on its environment. If a program interacts with hardware or remote files, its observability is likely lower.</p><h3>Q: Explain 'controllability' in the context of software systems and provide an example where controllability might be challenging.</h3><p>A: **Controllability** determines how easy it is to provide a program with the correct inputs to trigger desired behaviors.  Software controlled by keyboard inputs is highly controllable, but software with inputs from hardware sensors can be less so.</p><h3>Q: Identify the three conditions necessary for a failure to be observed in a software system and briefly describe each.</h3><p>A: The three conditions are **reachability**, **infection**, and **propagation**. Reachability ensures the fault's location in the code is executed. Infection means the program's state becomes incorrect due to the fault. Propagation signifies the incorrect state affecting the system's outputs, making the failure observable.</p><h3>Q: What is the role of a 'test driver' in software testing?</h3><p>A: A **test driver** is a component that orchestrates the execution of test cases by calling the software component being tested and providing it with input values. Think of it as the 'conductor' of a test scenario.</p></div>
+        <button class="collapsible">Practice Exam</button>
+        <div class="content">
+        <h2>SYSC4101 / SYSC5105 Practice Exam - Definitions and Test Scaffolding</h2>
+<p><strong>Instructions:</strong> Please answer all questions to the best of your ability. You may use your lecture notes and other course materials.</p>
+<p><strong>Multiple Choice (5 points each)</strong></p>
+<ol>
+<li>
+<p>Which of the following best describes a <strong>fault</strong> in a system?
+    a) A defect in the system's code
+    b) An unexpected state entered during runtime
+    c) A deviation in the system's service from its intended behavior
+    d) A missing component in the system architecture</p>
+</li>
+<li>
+<p>What are the three conditions necessary for a <strong>failure</strong> to be observed?
+    a) Reachability, infection, propagation
+    b) Controllability, observability, verification
+    c) Implementation, testing, deployment
+    d) Requirement, design, development</p>
+</li>
+<li>
+<p>Which of the following is <strong>NOT</strong> a component of a test scaffolding or test harness?
+    a) Test driver
+    b) Test stub
+    c) Test oracle
+    d) Test environment</p>
+</li>
+<li>
+<p>What does a <strong>test driver</strong> typically do in a test harness?
+    a) Verifies the correctness of the test results
+    b) Simulates the behavior of a missing component
+    c) Executes test cases and provides inputs to the system under test
+    d) Determines the expected outputs for a given set of inputs</p>
+</li>
+<li>
+<p>Which of the following concepts is <strong>most closely related</strong> to the idea of <strong>observability</strong> in a system?
+    a) Reachability
+    b) Infection
+    c) Propagation
+    d) Controllability</p>
+</li>
+</ol>
+<p><strong>Short Answer (10 points each)</strong></p>
+<ol>
+<li>
+<p>Explain the difference between a <strong>fault</strong> and a <strong>failure</strong> in software engineering. Provide an example of each.</p>
+</li>
+<li>
+<p>Describe the role of a <strong>test stub</strong> in a test harness. How does it help with testing?</p>
+</li>
+<li>
+<p>Briefly explain why it is important to understand the concepts of <strong>reachability</strong>, <strong>infection</strong>, and <strong>propagation</strong> when testing software.</p>
+</li>
+</ol>
+<p><strong>Long Answer / Essay (20 points each)</strong></p>
+<ol>
+<li>
+<p>Explain the concept of <strong>observability</strong> and <strong>controllability</strong> in the context of software testing. Discuss how these concepts influence the design and effectiveness of test cases.</p>
+</li>
+<li>
+<p>Imagine you are building a test harness for a complex software system. Describe the key components you would include in your test harness and explain how they work together to ensure comprehensive testing of the system.</p>
+</li>
+</ol>
+<h2>Answer Key</h2>
+<p><strong>Multiple Choice</strong></p>
+<ol>
+<li>
+<p><strong>a) A defect in the system's code</strong><br />
+<em>Explanation: A fault is a defect in the code or design, which can lead to errors and failures under certain conditions.</em></p>
+</li>
+<li>
+<p><strong>a) Reachability, infection, propagation</strong><br />
+<em>Explanation: These three conditions describe how a fault manifests into a failure. The fault must be reachable (code executed), it must infect the system's state (introducing an error), and the infected state must propagate to affect the system's output.</em></p>
+</li>
+<li>
+<p><strong>d) Test environment</strong><br />
+<em>Explanation: Test environment refers to the overall setup for testing, including hardware, software, and configurations.  The other three options are specific components of a test harness.</em></p>
+</li>
+<li>
+<p><strong>c) Executes test cases and provides inputs to the system under test</strong><br />
+<em>Explanation: The test driver controls the execution of test cases and provides the necessary inputs to the system under test.</em></p>
+</li>
+<li>
+<p><strong>c) Propagation</strong><br />
+<em>Explanation: Observability focuses on how easily we can observe the effects of a fault on the system's output. Propagation describes the spread of the infected state, which is directly related to observability.</em></p>
+</li>
+</ol>
+<p><strong>Short Answer</strong></p>
+<ol>
+<li>
+<p><em>A </em><em>fault</em><em> is a defect in the system's code or design. For example, a typographical error in a mathematical formula could be a fault. A </em><em>failure</em><em> occurs when the system deviates from its expected behavior due to a fault. For example, a program crashing because of a division by zero error would be a failure resulting from the fault of the divisor being zero.</em></p>
+</li>
+<li>
+<p><em>A </em><em>test stub</em><em> is a simplified implementation of a component that is called by the system under test. It simulates the behavior of the actual component without needing to fully implement it. This allows for testing the functionality of the system under test even if the actual called component is not yet available or incomplete.</em></p>
+</li>
+<li>
+<p><strong><em>Reachability</em>* is crucial because a fault cannot cause a failure if the faulty code is not executed. </strong>Infection<strong> is important because a fault must introduce an error in the system's state to lead to a failure. </strong>Propagation*<em> is necessary because the error must propagate to affect the system's output in order to be observed as a failure.</em></p>
+</li>
+</ol>
+<p><strong>Long Answer / Essay</strong></p>
+<ol>
+<li>
+<ul>
+<li><strong>Observability</strong> refers to the ease with which we can observe the behavior of a system under test, including its outputs, effects on the environment, and interactions with other components. High observability makes it easier to identify and diagnose faults, as we can see the effects of the fault on the system's behavior. <strong>Controllability</strong> refers to the ease with which we can control the inputs, operations, and behaviors of the system under test. High controllability enables us to isolate and test specific parts of the system and to trigger specific states or scenarios to observe the system's behavior under different conditions. These two concepts are essential for designing effective test cases. Test cases should be designed to maximize observability by providing clear indicators of the system's state and output. They should also be designed to maximize controllability by allowing us to test different inputs, operations, and scenarios. By combining observability and controllability, we can create comprehensive test cases that thoroughly evaluate the system's functionality, resilience, and behavior.*</li>
+</ul>
+</li>
+<li>
+<p><em>The test harness for a complex software system would typically include several components working together. </em><em>Test drivers</em><em> would control the execution of test cases, providing the required inputs and triggering specific system operations. </em><em>Test stubs</em><em> would simulate the behavior of missing or incomplete components, enabling the testing of components that depend on those components. </em><em>Test oracles</em><em> would be responsible for verifying the correctness of the test results. They could be implemented as software components that compare the actual outputs of the system with the expected outputs, or they could involve human experts who review the test results for correctness. Additionally, a </em><em>test environment</em><em> would be needed to provide the necessary hardware, software, and configurations to execute the test cases. This environment should be carefully designed to mimic the real-world environment in which the system will be deployed, to ensure that the tests are realistic and relevant. The test harness would be designed to be modular and extensible, allowing for easy addition and modification of test cases and components. It would also be designed to provide comprehensive coverage of the system's functionality, performance, and security. By using a well-designed test harness, developers can ensure that their software is thoroughly tested and meets the required quality standards.</em></p>
+</li>
+</ol>
+<p><strong>Scoring Guidelines for Short and Long Answer Questions</strong></p>
+<ul>
+<li><strong>Short Answer:</strong>  Points are awarded based on the accuracy and clarity of the explanation, including specific examples or justifications.</li>
+<li><strong>Long Answer:</strong> Points are awarded for:<ul>
+<li>A comprehensive understanding of the concepts discussed.</li>
+<li>Clear and well-organized explanations.</li>
+<li>Relevant examples and practical applications.</li>
+<li>Demonstrating critical thinking and a deep understanding of the topic.</li>
+</ul>
+</li>
+</ul>
+<p>Please note that these are just general guidelines, and the specific scoring criteria may vary depending on the instructor's expectations.</p></div>
+        <script>
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                } 
+            });
+        }
+        </script>
+    </body>
+    </html>
+    

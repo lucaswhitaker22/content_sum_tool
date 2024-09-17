@@ -27,7 +27,7 @@ class Lecture:
                 ),
                 "response_mime_type": "application/json",
             }
-        
+  
         model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=generation_config)
         
         prompt = """
@@ -39,7 +39,6 @@ class Lecture:
             Ensure the overview captures the main theme and purpose of the lecture. For topics, use clear and specific phrases rather than broad categories.
             """
 
-        
         response = client.generate_content(model, prompt, uploaded_files)
         # Convert JSON response to Python object
         try:
@@ -131,7 +130,8 @@ class Lecture:
         # Convert JSON response to Python object
         try:
             python_obj = json.loads(response)
-            return python_obj
+            return python_obj['review']
+
         except json.JSONDecodeError:
             print("Error: Unable to parse JSON response")
             return None
@@ -160,14 +160,12 @@ class Lecture:
         5. Provide a detailed answer key with:
         - Correct answers for all questions
         - Explanations for why each answer is correct
-        - Scoring guidelines for short and long answer questions
 
         Format the exam and answer key clearly using Markdown, as if preparing it for students to use.
         """
         
         return client.generate_content(model, prompt, uploaded_files)
     
-
     def generate_keywords(client, uploaded_files):
         generation_config = {
             "temperature": 1,
