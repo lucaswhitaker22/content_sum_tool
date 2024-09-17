@@ -142,7 +142,73 @@ class Lecture:
             "top_p": 0.95,
             "top_k": 64,
             "max_output_tokens": 8192,
-            "response_mime_type": "text/plain",
+            "response_schema": content.Schema(
+                type = content.Type.OBJECT,
+                required = ["short", "long", "multiple"],
+                properties = {
+                "short": content.Schema(
+                    type = content.Type.ARRAY,
+                    items = content.Schema(
+                    type = content.Type.OBJECT,
+                    required = ["question", "answer"],
+                    properties = {
+                        "question": content.Schema(
+                        type = content.Type.STRING,
+                        ),
+                        "answer": content.Schema(
+                        type = content.Type.STRING,
+                        ),
+                    },
+                    ),
+                ),
+                "long": content.Schema(
+                    type = content.Type.ARRAY,
+                    items = content.Schema(
+                    type = content.Type.OBJECT,
+                    required = ["question", "answer"],
+                    properties = {
+                        "question": content.Schema(
+                        type = content.Type.STRING,
+                        ),
+                        "answer": content.Schema(
+                        type = content.Type.STRING,
+                        ),
+                    },
+                    ),
+                ),
+                "multiple": content.Schema(
+                    type = content.Type.ARRAY,
+                    items = content.Schema(
+                    type = content.Type.OBJECT,
+                    required = ["question"],
+                    properties = {
+                        "question": content.Schema(
+                        type = content.Type.ARRAY,
+                        items = content.Schema(
+                            type = content.Type.OBJECT,
+                            required = ["options", "answer", "explanation"],
+                            properties = {
+                            "options": content.Schema(
+                                type = content.Type.ARRAY,
+                                items = content.Schema(
+                                type = content.Type.STRING,
+                                ),
+                            ),
+                            "answer": content.Schema(
+                                type = content.Type.STRING,
+                            ),
+                            "explanation": content.Schema(
+                                type = content.Type.STRING,
+                            ),
+                            },
+                        ),
+                        ),
+                    },
+                    ),
+                ),
+                },
+            ),
+            "response_mime_type": "application/json",
         }
             
         model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=generation_config)
@@ -164,7 +230,14 @@ class Lecture:
         Format the exam and answer key clearly using Markdown, as if preparing it for students to use.
         """
         
-        return client.generate_content(model, prompt, uploaded_files)
+        response = client.generate_content(model, prompt, uploaded_files)
+        try:
+            python_obj = json.loads(response)
+            return python_obj
+
+        except json.JSONDecodeError:
+            print("Error: Unable to parse JSON response")
+            return None
     
     def generate_keywords(client, uploaded_files):
         generation_config = {
