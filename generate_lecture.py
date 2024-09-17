@@ -180,30 +180,25 @@ class Lecture:
                     type = content.Type.ARRAY,
                     items = content.Schema(
                     type = content.Type.OBJECT,
-                    required = ["question"],
+                    required = ["question", "options","answer","explanation"],
                     properties = {
                         "question": content.Schema(
-                        type = content.Type.ARRAY,
-                        items = content.Schema(
-                            type = content.Type.OBJECT,
-                            required = ["options", "answer", "explanation"],
-                            properties = {
-                            "options": content.Schema(
-                                type = content.Type.ARRAY,
-                                items = content.Schema(
-                                type = content.Type.STRING,
-                                ),
-                            ),
-                            "answer": content.Schema(
-                                type = content.Type.STRING,
-                            ),
-                            "explanation": content.Schema(
-                                type = content.Type.STRING,
-                            ),
-                            },
+                            type = content.Type.STRING,
                         ),
+                        "options": content.Schema(
+                            type = content.Type.ARRAY,
+                            items = content.Schema(
+                            type = content.Type.STRING,
+                            ),
                         ),
-                    },
+                        "answer": content.Schema(
+                            type = content.Type.STRING,
+                        ),
+                        "explanation": content.Schema(
+                            type = content.Type.STRING,
+                        ),
+                        },
+                    
                     ),
                 ),
                 },

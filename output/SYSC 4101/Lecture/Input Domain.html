@@ -1,0 +1,361 @@
+
+    <html>
+    <head>
+        <title>Input Domain</title>
+        <style>
+            body { 
+                font-family: Arial, sans-serif; 
+                line-height: 1.6; 
+                padding: 20px; 
+                background-color: #f9f9f9; 
+                color: #333; 
+            }
+            h1 { 
+                text-align: center; 
+                color: #4CAF50; 
+            }
+            h2, h3 { 
+                color: #333; 
+                margin-top: 20px; 
+            }
+            p { 
+                margin: 10px 0; 
+            }
+            .collapsible { 
+                background-color: #4CAF50; 
+                color: white; 
+                cursor: pointer; 
+                padding: 15px; 
+                width: 100%; 
+                border: none; 
+                text-align: left; 
+                outline: none; 
+                font-size: 16px; 
+                border-radius: 5px;
+                transition: background-color 0.3s;
+            }
+            .collapsible:hover { 
+                background-color: #45a049; 
+            }
+            .collapsible:after {
+                content: '\002B';
+                color: white;
+                font-weight: bold;
+                float: right;
+                margin-left: 5px;
+            }
+            .active:after {
+                content: "\2212";
+            }
+            .content {
+                padding: 0 15px;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.2s ease-out;
+                background-color: #e7f3fe;
+                border-left: 5px solid #4CAF50;
+                margin-bottom: 20px;
+                border-radius: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Input Domain</h1>
+        <p><strong>Course:</strong> SYSC 4101</p>
+        <p><strong>Date:</strong> 2024-09-17</p>
+        <p><strong>Overview:</strong> This lecture focuses on software testing, particularly exploring the concepts of test data selection and different test model criteria. It aims to equip students with the knowledge and techniques for effective software testing.</p>
+
+        <button class="collapsible">Lecture Notes</button>
+        <div class="content">
+            <h1>SYSC4101 / SYSC5105: Definitions - Part II</h1>
+<h2>Exhaustive Testing</h2>
+<ul>
+<li><strong>Exhaustive Testing:</strong> Testing using all possible inputs.</li>
+<li>Most of the time this is impossible.</li>
+<li><strong>Examples:</strong></li>
+<li>A program that computes the factorial function (n! = n * (n-1) * (n-2) * ... * 1)<ul>
+<li>Exhaustive testing would mean running the program with all possible integer values (0, 1, 2, ...).</li>
+</ul>
+</li>
+<li>
+<p>A compiler (e.g., javac)</p>
+<ul>
+<li>Exhaustive testing would mean compiling every possible Java program.</li>
+</ul>
+</li>
+<li>
+<p><strong>Technique to Reduce Inputs:</strong></p>
+</li>
+<li><strong>Equivalence Classes:</strong> Group input elements into equivalence classes based on testing criteria.</li>
+<li><strong>Test Data Adequacy:</strong> Select one input from each equivalence class.</li>
+<li><strong>Criteria for Selection:</strong>  Use criteria to decide which test inputs to use and when to stop testing.</li>
+</ul>
+<h2>Test Data: Procedure to Select</h2>
+<ul>
+<li><strong>Test Model:</strong> A representation of either the specification or implementation of the software.</li>
+<li><strong>Functional Testing:</strong> The test model represents the specification.</li>
+<li><strong>Structural Testing:</strong> The test model represents the implementation.</li>
+<li><strong>Test Objectives (Requirements):</strong> The criteria associated with the test model.</li>
+<li><strong>Test Cases:</strong> Must exercise all the elements defined by the test objectives within the test model.</li>
+<li><strong>Test Data:</strong> The input values used to execute the test cases.</li>
+</ul>
+<h2>Functional vs. Structural Testing</h2>
+<p>| Functional Testing                                                                   | Structural Testing                                                                   |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| <strong>Advantages:</strong>                                                                | <strong>Advantages:</strong>                                                                |
+| - Checks conformance with the specification.                                    | - Based on control and data flow criteria.                                      |
+| - Scales up to different levels of granularity (function, class, system, etc.). | - Provides confidence about the coverage of the system being tested.              |
+| <strong>Disadvantages:</strong>                                                              | <strong>Disadvantages:</strong>                                                              |
+| - Depends on the specification and the level of detail provided.                | - Does not scale up well, mainly used at unit and integration testing levels. |
+| - Cannot reveal missing functionalities.                                       | - Cannot reveal unexpected functionalities.                                     |</p>
+<h2>Test Model Criterion</h2>
+<ul>
+<li><strong>Coverage Ratio:</strong> The proportion of elements in a model M, defined by a criterion C, that are covered by a test set T.</li>
+<li><strong>C-Adequate Test Set:</strong> A test set T is C-adequate when the coverage ratio achieves 100% for criterion C.</li>
+</ul>
+<p><strong>Example 1:</strong></p>
+<ul>
+<li>M: Control flow graph of a function.</li>
+<li>C: All the statements.</li>
+<li>If a test suite exercises 5 out of 8 statements, the coverage ratio is 62.5%. This test suite is <strong>not adequate</strong> for the all-statements criterion.</li>
+</ul>
+<p><strong>Example 2:</strong></p>
+<ul>
+<li>M: A set of use case scenarios.</li>
+<li>C: All the scenarios.</li>
+<li>If a test suite exercises 12 out of 12 scenarios, the coverage ratio is 100%. This test suite is <strong>adequate</strong> for the all-scenarios criterion.</li>
+</ul>
+<h2>Test Model Criterion (cont.)</h2>
+<ul>
+<li><strong>Test Criterion:</strong> Specifies a set of test requirements/objectives that must be satisfied to obtain an adequate test suite.</li>
+<li><strong>Issue:</strong> When applying a criterion to a test model, not all test requirements may be feasible.</li>
+<li><strong>Revised Notion of Adequacy:</strong> The coverage ratio of a test set T is the proportion of <strong>feasible</strong> elements in M defined by C covered by T.</li>
+<li><strong>Revised C-Adequate Test Set:</strong> A test set T is C-adequate when the coverage ratio achieves 100% for criterion C, considering only feasible elements.</li>
+</ul>
+<h2>Theoretical Hierarchy of Criteria</h2>
+<ul>
+<li><strong>Subsumption Relation:</strong> C1 subsumes C2 if any C1-adequate test set is also C2-adequate.</li>
+<li><strong>Important:</strong> This is <strong>not a subset relation</strong>. The set of model elements needed to satisfy C2 may not be a subset of those needed to satisfy C1.</li>
+<li><strong>Example:</strong></li>
+<li>Criteria: all-transitions and all-paths for finite state machines.</li>
+<li>All-paths subsumes all-transitions, as any test suite exercising all paths will automatically cover all transitions.</li>
+<li><strong>Usually, if C1 subsumes C2:</strong></li>
+<li>Satisfying C1 is <strong>more expensive</strong> than satisfying C2.</li>
+<li>A C1-adequate test suite <strong>detects more faults</strong> than a C2-adequate test suite.</li>
+</ul>
+<h2>Two Ways to Use Test Criteria</h2>
+<ol>
+<li><strong>Generate Test Values / Test Cases:</strong></li>
+<li><strong>Selection Criterion:</strong> The test criterion is used to generate test values/cases.</li>
+<li><strong>Generator:</strong> A tool (or human) that automatically generates test values/cases to satisfy the criterion.</li>
+<li>
+<p><strong>Wish:</strong> Create a software generator?</p>
+</li>
+<li>
+<p><strong>Evaluate Coverage:</strong></p>
+</li>
+<li><strong>Coverage Criterion:</strong> The test criterion is used to evaluate coverage achieved by externally generated test values/cases.</li>
+<li><strong>Recognizer:</strong> A tool (or human) that automatically determines whether a set of values satisfies the criterion.</li>
+<li><strong>Wish:</strong> Create a software recognizer?</li>
+</ol>
+<h2>Two Ways to Use Test Criteria (cont.)</h2>
+<ul>
+<li><strong>Problems:</strong></li>
+<li>How to create a generator?</li>
+<li>How to create a recognizer?</li>
+<li><strong>Issue!:</strong> Both problems are provably <strong>undecidable</strong> for most criteria.</li>
+<li>It is not possible to create a single algorithm that always finds a correct solution.</li>
+<li><strong>However:</strong> It is often easier to build a <strong>recognizer</strong> than a <strong>generator</strong>.</li>
+<li>Coverage analysis tools (recognizers) are quite plentiful.</li>
+</ul>
+<h2>Miss-Use of Terminology</h2>
+<ul>
+<li><strong>Beware:</strong> Of the miss-use of the term "coverage".</li>
+<li><strong>Example:</strong></li>
+<li>"I am checking what my tests exercise with the all-statements selection criterion."<ul>
+<li><strong>Incorrect:</strong> This statement implies using the all-statements criterion as a <strong>recognizer</strong>, but it should be a <strong>selection criterion</strong> for generating test cases.</li>
+</ul>
+</li>
+<li>"I am creating tests with the all-scenarios coverage criterion."<ul>
+<li><strong>Incorrect:</strong> This statement implies using the all-scenarios criterion as a <strong>generator</strong>, but it should be a <strong>coverage criterion</strong> for evaluating test cases.</li>
+</ul>
+</li>
+<li>"I am doing structural testing since I check my tests execute all statements."<ul>
+<li><strong>Incorrect:</strong> Structural testing involves using a selection criterion to generate tests based on the implementation model. Checking test execution is a <strong>recognizer</strong> function, not structural testing itself.</li>
+</ul>
+</li>
+</ul>
+<h2>Using a Test Selection Criterion</h2>
+<p><strong>Steps:</strong></p>
+<ol>
+<li><strong>Choose a Test Model:</strong> Define the model representing the software under test (e.g., state machine, flow graph).</li>
+<li><strong>Select a Test Criterion:</strong> Choose a criterion to guide test case generation (e.g., all-transitions, all-paths).</li>
+<li><strong>Identify Test Objectives:</strong> Define the specific aspects of the model to be covered by the tests.</li>
+<li><strong>Create Test Case Specifications:</strong> Outline the intended behavior of each test case.</li>
+<li><strong>Identifying Test Data/Input:</strong> Determine the input values needed to execute each test case.</li>
+<li><strong>Identify Oracle:</strong> Define the expected outputs or behavior for each test case.</li>
+</ol>
+<p><strong>Example:</strong></p>
+<ul>
+<li><strong>Test Model:</strong> State machine</li>
+<li><strong>Test Criterion:</strong> All-transitions</li>
+<li><strong>Test Objectives:</strong> Ensure all transitions in the state machine are covered by the test cases.</li>
+<li><strong>Test Case Specifications:</strong> Create test cases that exercise specific sets of transitions.</li>
+<li><strong>Test Data/Input:</strong> Define input values that trigger the desired transitions.</li>
+<li><strong>Oracle:</strong> Specify the expected state transitions and outputs for each test case.</li>
+</ul>
+<h2>Example (Graph) Model</h2>
+<ul>
+<li><strong>Test Model:</strong> A vending machine represented as a graph.</li>
+<li><strong>Test Criterion:</strong> All-transitions.</li>
+<li><strong>Test Objectives:</strong> Cover all transitions in the vending machine graph.</li>
+<li><strong>Test Case Specifications:</strong></li>
+<li>TCS1: [Got0, Got5, Got10] - Cover the transitions from state Got0 to Got5, Got5 to Got10, and Got10 to Got0.</li>
+<li>TCS2: [Got0, Got10, Got0] - Cover the transitions from Got0 to Got10, Got10 to Got0, and Got0 to Got10.</li>
+<li>TCS3: [Got0, Got10, Got5, Got0] - Cover the transitions from Got0 to Got10, Got10 to Got5, Got5 to Got0, and Got0 to Got0.</li>
+<li><strong>Test Data:</strong></li>
+<li>TC1: [5p, 5p] - Represents two 5p coins inserted.</li>
+<li>TC2: [10p, 5p] - Represents a 10p coin followed by a 5p coin.</li>
+<li>TC3: [10p, 10p, 10p] - Represents three 10p coins inserted.</li>
+<li><strong>Oracles:</strong></li>
+<li>TC1: The machine should have 10p inside and no cans dispensed.</li>
+<li>TC2: The machine should have 0p inside and one can dispensed.</li>
+<li>TC3: The machine should have 0p inside and two cans dispensed.</li>
+</ul>
+<h2>Marick's Recommendation</h2>
+<p>Brian Marick recommends a three-step approach:</p>
+<ol>
+<li><strong>Generate Functional Tests:</strong></li>
+<li>Use a functional selection criterion (generator) to generate test cases that cover all functions in the software.</li>
+<li><strong>Check Structural Coverage:</strong></li>
+<li>Use a structural coverage criterion (recognizer) to evaluate if the generated functional tests provide adequate structural coverage of the code.</li>
+<li><strong>Induce Missing Coverage:</strong></li>
+<li>If the structural coverage is incomplete, generate additional functional tests (not structural) that induce the missing coverage.</li>
+</ol>
+<p><strong>Rationale:</strong> This approach prioritizes testing functionality first and then uses structural testing to ensure comprehensive coverage. The assumption is that uncovered code must have a purpose, which is likely untested functionality.</p>
+<h2>Test Criteria Based on Structure (Offutt)</h2>
+<ul>
+<li><strong>Graphs:</strong></li>
+<li>Model the structure of software components using graph representations.</li>
+<li>Examples:<ul>
+<li>Method body</li>
+<li>Methods and calls</li>
+<li>Components interactions</li>
+<li>State transitions</li>
+</ul>
+</li>
+<li><strong>Logical Expressions:</strong></li>
+<li>Represent conditions or relationships within the software.</li>
+<li>Examples:<ul>
+<li>(not X or not Y) and A and B</li>
+<li>A: {0, 1, &gt;1}</li>
+<li>B: {600, 700, 800}</li>
+<li>C: {swe, cs, isa, infs}</li>
+</ul>
+</li>
+<li><strong>Input Domain Characterization:</strong></li>
+<li>Describes the possible input values for a specific component or the entire system.</li>
+<li>Example:<ul>
+<li>if (x &gt; y)</li>
+<li>z = x - y;</li>
+<li>else</li>
+<li>z = 2 * x</li>
+</ul>
+</li>
+<li><strong>Syntactic Structures:</strong></li>
+<li>Focus on the syntactic aspects of the code, such as grammar or specific constructs.</li>
+<li>Example: Mutation testing, where code mutations are introduced to evaluate if the tests can detect them.</li>
+</ul>
+<h2>Test Criteria - Graphs</h2>
+<ul>
+<li><strong>Example:</strong> A graph representing the control flow of a program, showing nodes for different states and edges for transitions.</li>
+<li><strong>Use:</strong> To analyze the flow of control and identify potential paths that are not covered by existing test cases.</li>
+</ul>
+<h2>Test Criteria - Logic Expressions</h2>
+<ul>
+<li><strong>Example:</strong>  A boolean expression representing a condition in the code.</li>
+<li><strong>Use:</strong> To generate test cases that cover different truth values (true or false) of the condition.</li>
+</ul>
+<h2>Test Criteria - Input Domain Characterization</h2>
+<ul>
+<li><strong>Example:</strong> Describing the possible input values for a function or a system.</li>
+<li><strong>Use:</strong> To ensure that test cases cover the full range of possible inputs.</li>
+</ul>
+<h2>Test Criteria - Syntactic Structure</h2>
+<ul>
+<li><strong>Example:</strong> Analyzing the code based on its grammar or syntactic constructs.</li>
+<li><strong>Use:</strong> To ensure that test cases cover different variations of code structure, such as different ways to express the same logic.</li>
+</ul>
+<h2>Conclusion</h2>
+<p>This lecture introduced key concepts related to test criteria, including:</p>
+<ul>
+<li><strong>Exhaustive Testing:</strong> Ideal but usually impractical.</li>
+<li><strong>Test Data Selection:</strong> Based on test models and criteria.</li>
+<li><strong>Functional vs. Structural Testing:</strong> Complementary approaches with different strengths and weaknesses.</li>
+<li><strong>Test Model Criteria:</strong> Define coverage requirements for test suites.</li>
+<li><strong>Hierarchical Relationship of Criteria:</strong> C1 subsumes C2 if any C1-adequate test set is also C2-adequate.</li>
+<li><strong>Using Test Criteria:</strong> Either generate test values/cases or evaluate coverage.</li>
+<li><strong>Miss-use of Terminology:</strong> Common errors related to the term "coverage".</li>
+<li><strong>Marick's Recommendation:</strong> Prioritize functional testing, then check structural coverage, and lastly induce missing coverage.</li>
+<li><strong>Test Criteria Based on Structure (Offutt):</strong> Graphs, logical expressions, input domain characterization, and syntactic structures.</li>
+</ul>
+<p><strong>Further Research:</strong></p>
+<ul>
+<li>Explore different techniques for generating and evaluating test cases.</li>
+<li>Investigate the use of test criteria in various software development methodologies.</li>
+<li>Analyze the trade-offs between functional and structural testing in practice.</li>
+<li>Delve into the implementation of coverage analysis tools.</li>
+</ul>
+        </div>
+
+        <button class="collapsible">Keywords and Definitions</button>
+        <div class="content">
+            <h1>Glossary of Terms</h1>
+<p>Here is a glossary of key terms and concepts from the lecture document/presentation, organized alphabetically.</p>
+<ul>
+<li><strong>All-paths criterion:</strong> A test criterion for finite state machines that requires a test suite to exercise all possible paths through the machine. </li>
+<li><strong>All-transitions criterion:</strong> A test criterion for finite state machines that requires a test suite to exercise all possible transitions of the machine.</li>
+<li><strong>Adequate test set:</strong> A test set that satisfies all the requirements of a given test criterion.</li>
+<li><strong>Coverage criterion:</strong> A test criterion used to evaluate the coverage achieved by a set of test cases. It determines whether a set of test cases satisfies a specific criterion. </li>
+<li><strong>Coverage ratio:</strong> The proportion of the elements in a model that are covered by a test set.</li>
+<li><strong>Exhaustive testing:</strong> Testing a program using all possible inputs. In most cases, this is impossible due to the vast number of potential inputs.</li>
+<li><strong>Feasible elements:</strong> The elements of a model that are relevant to a particular test criterion. These elements are usually a subset of the total number of elements in the model.</li>
+<li><strong>Functional testing:</strong> Testing that focuses on verifying the behavior of a system according to its specifications. It doesn't consider the internal structure of the system.</li>
+<li><strong>Generator:</strong> A tool or method that automatically generates test cases to satisfy a selection criterion.</li>
+<li><strong>Input domain characterization:</strong> A test criterion based on the input domain of a system, method, or component. It describes the range and types of valid inputs for a specific part of the software.</li>
+<li><strong>Recognizer:</strong> A tool or method that automatically determines whether a set of test cases satisfies a specific criterion.</li>
+<li><strong>Selection criterion:</strong> A test criterion used to generate test cases, focusing on specific aspects of the system to test. It's often used with generators.</li>
+<li><strong>Structural testing:</strong> Testing that focuses on verifying the internal structure of a system, ensuring that all components and paths are covered. </li>
+<li><strong>Subsumes:</strong> A relationship between two test criteria for the same model where a test set that satisfies one criterion (C1) also automatically satisfies another criterion (C2). </li>
+<li><strong>Test criterion:</strong> A rule or set of rules that defines the objectives and requirements for testing a specific aspect of a system. </li>
+<li><strong>Test model:</strong> A representation of the software under test. This representation can be a graph, a specification, or any other structure that captures the essential aspects of the system.</li>
+<li><strong>Test objectives:</strong> The specific goals or requirements that need to be met during testing, derived from the system's specifications or requirements. </li>
+</ul>
+<p>Understanding these terms is essential for comprehending the lecture material and applying the concepts of test criteria and test case generation. </p>
+        </div>
+
+        <button class="collapsible">Review Questions</button>
+        <div class="content">
+    <h3>Q: What is exhaustive testing, and why is it often impractical?</h3><p>A: Exhaustive testing aims to cover all possible input combinations for a program or system. It's often impossible to achieve due to the vast number of potential inputs.</p><h3>Q: Explain why testing a program that calculates factorials using exhaustive testing is impractical.</h3><p>A: Exhaustive testing becomes unfeasible when dealing with programs that accept numerous inputs, like those handling integer values, as the number of potential inputs grows exponentially.</p><h3>Q: What is equivalence class testing, and how does it simplify the testing process?</h3><p>A: Equivalence class testing is a technique that groups similar inputs into classes, allowing testers to select representative inputs from each class, thereby reducing the overall test cases.</p><h3>Q: What is functional testing, and what is its primary focus?</h3><p>A: Functional testing focuses on verifying that a system behaves as specified in its requirements. It's concerned with how the system works from an external perspective.</p><h3>Q: What is structural testing, and what does it aim to assess?</h3><p>A: Structural testing checks if the code's internal structure is adequately exercised during testing. It's more concerned with how the code is written and executed rather than its external behavior.</p><h3>Q: Compare the scalability of functional and structural testing approaches.</h3><p>A: Functional testing is more scalable and adaptable to different system complexities, while structural testing is often limited to unit and integration levels.</p><h3>Q: Explain the purpose of the test model criterion in software testing.</h3><p>A: The test model criterion is a set of requirements or objectives that specify what should be covered by the test suite. It helps ensure that the chosen test cases adequately address the system's functionality or structure.</p></div>
+        <button class="collapsible">Practice Exam</button>
+        <div class="content">
+        <h2>Short Answer Questions</h2><h3>Q: What is a test oracle?</h3><p>A: A test oracle is a mechanism or reference point that is used to determine whether the actual output of the system under test matches the expected output. It acts as a standard against which the test results are compared to determine success or failure. Test oracles can be anything from a detailed specification document, a set of predefined values, or even a human expert who can judge the correctness of the results.</p><h3>Q: What is meant by 'test data adequacy'?</h3><p>A: Test data adequacy refers to the quality and representativeness of the test data used in testing. It aims to ensure that the test cases adequately cover the various inputs and conditions that the software is expected to handle.  Adequate test data is crucial for effective testing, as it helps ensure that the test suite is able to identify a wide range of defects.</p><h3>Q: What is a test model?</h3><p>A: A test model is a representation of the system under test. It can be a simplified version of the actual system or a more abstract representation of its behavior.  Test models are often used to define test criteria and objectives, allowing testers to focus on specific aspects of the system's functionality or structure.  They provide a framework for planning and designing test cases.</p><h2>Long Answer Questions</h2><h3>Q: Explain the difference between structural testing and functional testing.</h3><p>A: Structural testing aims to ensure that every part of the code has been executed at least once. This means testing all branches of the code, including all conditional statements and loops. This approach helps identify potential issues related to the program's internal logic and flow of control. Functional testing, on the other hand, focuses on verifying that the software meets its specified requirements. It assesses whether the software behaves as expected and fulfills the desired functionality.  Functional testing checks the software's external behavior, ensuring it performs its intended tasks without errors. Both approaches are crucial for comprehensive testing, as they complement each other in identifying different types of defects.</p><h3>Q: What is exhaustive testing, and why is it often impossible to achieve?</h3><p>A: Exhaustive testing is a testing technique that aims to cover all possible inputs and test cases.  However, it is often impossible to achieve exhaustive testing, especially for complex systems with numerous input combinations.  This is because the number of possible inputs can be extremely large, making it impractical or even impossible to test them all.  In such situations, test criteria are used to select a representative subset of inputs that provide sufficient coverage of the system's behavior. Test criteria help to reduce the testing effort while ensuring a reasonable level of confidence in the software's quality.</p><h2>Multiple Choice Questions</h2><h3>Q: What does the all-statements criterion aim to achieve in structural testing?</h3><ul><li>The all-statements criterion checks that every statement in the code is executed at least once. It helps identify issues with the program's logic and flow of control.</li><li>The all-paths criterion aims to test all possible execution paths through the code. It helps ensure that every possible sequence of statements is executed.</li><li>The all-transitions criterion focuses on testing all possible transitions between different states of the software. It is particularly relevant for state machines.</li><li>The all-branches criterion ensures that all branches of conditional statements are executed, helping identify issues with decision-making logic in the code.</li></ul><p>Correct Answer: The all-statements criterion aims to ensure that each statement in the code is executed at least once. It helps identify issues with the program's logic and flow of control.</p><p>Explanation: The all-statements criterion checks that every statement is executed, aiding in finding logic and control flow issues. The other options are not directly related to this criterion.</p><h3>Q: What is the role of a recognizer in test criteria?</h3><ul><li>A recognizer is a tool or a process that determines whether a set of test cases satisfies a particular test criterion. It automatically checks if the test cases cover all the requirements defined by the criterion. This approach helps automate coverage analysis and provides an objective assessment of the testing effort.</li><li>A generator is a tool or a process that generates test cases based on a specific test criterion. It automatically produces test cases that satisfy the requirements of the criterion.</li><li>A tester is a person who manually designs, executes, and analyzes test cases for software. They play a critical role in identifying and fixing defects in the software.</li><li>A debugger is a tool used to identify and fix errors in code. It allows developers to step through the code, inspect variables, and understand the program's execution flow.</li></ul><p>Correct Answer: A recognizer is a tool or a process that determines whether a set of test cases satisfies a particular test criterion. It automatically checks if the test cases cover all the requirements defined by the criterion. This approach helps automate coverage analysis and provides an objective assessment of the testing effort.</p><p>Explanation: A recognizer is used to assess the coverage of test cases against a criterion. It automatically determines if the criterion is met, making it a useful tool for coverage analysis.</p><h3>Q: Which of the following criteria ensures that every possible sequence of statements in a program is executed at least once?</h3><ul><li>The all-paths criterion focuses on testing all possible execution paths through the code. It ensures that every possible sequence of statements is executed, aiding in finding potential issues related to the program's control flow and data dependencies.  This criterion is particularly useful for identifying defects that may only manifest under specific sequences of events.</li><li>The all-statements criterion aims to ensure that each statement in the code is executed at least once. It helps identify issues with the program's logic and flow of control.</li><li>The all-transitions criterion focuses on testing all possible transitions between different states of the software. It is particularly relevant for state machines.</li><li>The all-branches criterion ensures that all branches of conditional statements are executed, helping identify issues with decision-making logic in the code.</li></ul><p>Correct Answer: The all-paths criterion focuses on testing all possible execution paths through the code. It ensures that every possible sequence of statements is executed, aiding in finding potential issues related to the program's control flow and data dependencies.  This criterion is particularly useful for identifying defects that may only manifest under specific sequences of events.</p><p>Explanation: The all-paths criterion aims to test all possible execution paths, which is crucial for detecting flow-related issues.</p><h3>Q: Which of the following criteria is particularly relevant for testing state machines?</h3><ul><li>The all-transitions criterion focuses on testing all possible transitions between different states of the software. It is particularly relevant for state machines, where the software's behavior is determined by its current state and the transitions between states. This criterion ensures that all possible state changes are tested, helping identify potential issues with the software's state management and transitions.</li><li>The all-paths criterion aims to test all possible execution paths through the code. It helps ensure that every possible sequence of statements is executed.</li><li>The all-statements criterion aims to ensure that each statement in the code is executed at least once. It helps identify issues with the program's logic and flow of control.</li><li>The all-branches criterion ensures that all branches of conditional statements are executed, helping identify issues with decision-making logic in the code.</li></ul><p>Correct Answer: The all-transitions criterion focuses on testing all possible transitions between different states of the software. It is particularly relevant for state machines, where the software's behavior is determined by its current state and the transitions between states. This criterion ensures that all possible state changes are tested, helping identify potential issues with the software's state management and transitions.</p><p>Explanation: The all-transitions criterion specifically tests all possible state changes in a state machine.</p><h3>Q: What is mutation testing?</h3><ul><li>Mutation testing involves introducing intentional faults, or mutations, into the code. The objective is to see if the test suite can detect these injected faults. If the test suite fails to detect the mutations, it indicates a weakness in the test suite's ability to identify defects. This approach helps improve the test suite's effectiveness by revealing areas where it may be missing crucial test cases. </li><li>Boundary value analysis focuses on testing the boundaries of input domains. It aims to identify potential errors that occur when inputs are at or near the boundaries of the valid range.</li><li>Equivalence partitioning divides the input domain into a set of equivalence classes. The assumption is that all inputs within the same equivalence class will behave similarly in terms of the software's behavior. </li><li>Decision table testing is a structured testing technique used to create test cases that cover all possible combinations of inputs and conditions defined in a decision table.</li></ul><p>Correct Answer: Mutation testing involves introducing intentional faults, or mutations, into the code. The objective is to see if the test suite can detect these injected faults. If the test suite fails to detect the mutations, it indicates a weakness in the test suite's ability to identify defects. This approach helps improve the test suite's effectiveness by revealing areas where it may be missing crucial test cases. </p><p>Explanation: Mutation testing is a technique that involves deliberately introducing faults to see if the test suite can detect them.</p></div>
+        <script>
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                } 
+            });
+        }
+        </script>
+    </body>
+    </html>
+    

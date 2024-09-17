@@ -166,7 +166,30 @@ def gen_html(data):
         <button class="collapsible">Practice Exam</button>
         <div class="content">
         """
-        html += markdown.markdown(data['practice'])
+        
+        if 'short' in data['practice']:
+            html += "<h2>Short Answer Questions</h2>"
+            for item in data['practice']['short']:
+                html += f"<h3>Q: {item['question']}</h3>"
+                html += f"<p>A: {item['answer']}</p>"
+        
+        if 'long' in data['practice']:
+            html += "<h2>Long Answer Questions</h2>"
+            for item in data['practice']['long']:
+                html += f"<h3>Q: {item['question']}</h3>"
+                html += f"<p>A: {item['answer']}</p>"
+        
+        if 'multiple' in data['practice']:
+            html += "<h2>Multiple Choice Questions</h2>"
+            for item in data['practice']['multiple']:
+                html += f"<h3>Q: {item['question']}</h3>"
+                html += "<ul>"
+                for option in item['options']:
+                    html += f"<li>{option}</li>"
+                html += "</ul>"
+                html += f"<p>Correct Answer: {item['answer']}</p>"
+                html += f"<p>Explanation: {item['explanation']}</p>"
+        
         html += "</div>"
     
     html += """
@@ -192,6 +215,7 @@ def gen_html(data):
 
     logger.info(f"HTML generation completed for {data['metadata']['title']}")
     return html
+
 def output_to_html_and_json(data, output_path):
     # Ensure the output directory exists for JSON
     json_output_path = output_path.replace('.html', '.json').replace('/output/', '/output/json/')
