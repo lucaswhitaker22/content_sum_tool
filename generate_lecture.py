@@ -180,7 +180,7 @@ class Lecture:
         model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=generation_config)
 
         prompt = """
-        Create a glossary of key terms and concepts from the lecture document/presentation:
+        Create a glossary of new/advanced key terms and concepts from the lecture document/presentation:
 
         1. Identify 10-15 important terms, phrases, or concepts
         2. For each entry, provide:
