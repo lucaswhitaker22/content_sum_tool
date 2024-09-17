@@ -4,39 +4,80 @@ from client import Client
 from datetime import date
 from generate_lecture import Lecture
 import markdown
-content_args = {
-    "format": "Lecture",
-    "date": date.today(),
-    "course":"SYSC 4101",
-    "title":"Validation Context"
-}
+import os
+from client import Client
+from datetime import date
+from generate_lecture import Lecture
+import markdown
+import logging
+from datetime import date, timedelta
 
-def generate_lecture(client, uploaded_files):
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+content_args_list = [
+    {
+        "format": "Lecture",
+        "date": date.today()- timedelta(days=7),
+        "course":"SYSC 4101",
+        "title":"Definitions 1",
+        "path":"input/SYSC4101-5105_Definitions_PI.pdf"
+    },
+    {
+        "format": "Lecture",
+        "date": date.today()- timedelta(days=4),
+        "course":"SYSC 4101",
+        "title":"Definitions 2",
+        "path":"input/SYSC4101-5105_Definitions_PII.pdf"
+    },
+    {
+        "format": "Lecture",
+        "date": date.today(),
+        "course":"SYSC 4101",
+        "title":"Input Domain",
+        "path":"input/SYSC4101-5105_InputDomainTesting_PI.pdf"
+    }
+]
+
+def generate_lecture(client, content, uploaded_files):
+    logger.info(f"Generating lecture for {content['title']}")
+    
     # Generate initial metadata
+    logger.debug("Generating metadata")
     metadata = Lecture.generate_metadata(client, uploaded_files)
     
     # Add content_args to the metadata without overwriting existing keys
-    for key, value in content_args.items():
+    for key, value in content.items():
         if key not in metadata:
             metadata[key] = value
     
+    logger.debug("Generating notes")
     notes = Lecture.generate_notes(client, uploaded_files)
+    
+    logger.debug("Generating review")
     review = Lecture.generate_review(client, uploaded_files)
+    
+    logger.debug("Generating keywords")
+
     keywords = Lecture.generate_keywords(client, uploaded_files)
+    
+    logger.debug("Generating practice")
     practice = Lecture.generate_practice(client, uploaded_files)
-
+    
     data = {
-
         "metadata": metadata,
-        "notes":notes,
-        "review":review,
-        "keywords":keywords,
-        "practice":practice,
-  
+        "notes": notes,
+        "review": review,
+        "keywords": keywords,
+        "practice": practice,
     }
+    
+    logger.info(f"Lecture generation completed for {content['title']}")
     return data
 
 def gen_html(data):
+    logger.info(f"Generating HTML for {data['metadata']['title']}")
     html = f"""
     <html>
     <head>
@@ -153,6 +194,8 @@ def gen_html(data):
     </body>
     </html>
     """
+
+    logger.info(f"HTML generation completed for {data['metadata']['title']}")
     return html
 
 def output_to_html(data, output_path):
@@ -170,17 +213,22 @@ def output_to_html(data, output_path):
 
 def main():
     api_key = "AIzaSyDlgPeD6BZ16dVTn9xiKl_vq41U1gzNENI"
-    input_directory = "input/"
-
     client = Client(api_key)
-    uploaded_files = client.upload_files(input_directory)
-    client.retrieve_files(uploaded_files)
+    logger.info("Starting lecture generation process")
+    for content_args in content_args_list:
+        logger.info(f"Processing {content_args['title']}")
+        file_path = content_args['path']
+        uploaded_file = client.upload_file(file_path)
+        client.retrieve_file(uploaded_file)
 
-    match content_args['format']:
-        case 'Lecture':
-            data = generate_lecture(client, uploaded_files)
-            output_path = f"output/{data['metadata']['course']}/{data['metadata']['format']}/{data['metadata']['title']}.html"
-            output_to_html(data, output_path)
+        match content_args['format']:
+            case 'Lecture':
+                data = generate_lecture(client, content_args, uploaded_file)
+                output_path = f"output/{data['metadata']['course']}/{data['metadata']['format']}/{data['metadata']['title']}.html"
+                output_to_html(data, output_path)
+                logger.info(f"Saved HTML to {output_path}")
+
+    logger.info("Lecture generation process completed")
 
 if __name__ == "__main__":
     main()
