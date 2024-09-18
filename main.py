@@ -247,6 +247,7 @@ def gen_html(data):
 
     logger.info(f"HTML generation completed for {data['metadata']['title']}")
     return html
+
 def output_to_html_and_json(data, output_path):
     # Ensure the output directory exists for JSON
     json_output_path = output_path.replace('.html', '.json').replace('/output/', '/output/json/')
@@ -272,16 +273,16 @@ def output_to_html_and_json(data, output_path):
         },
         'notes': data['notes'],
         'review': data['review'],
-        'keywords': data['keywords']
+        'keywords': data['keywords'],
+        'practice': data['practice']
     }
 
-    # Write the data to a JSON file
+    # Write the data to a JSON file (overwriting if it exists)
     with open(json_output_path, 'w', encoding='utf-8') as json_file:
         json.dump(json_data, json_file, ensure_ascii=False, indent=4)
 
+    print(f'JSON file created/updated: {json_output_path}')
     print(f'HTML file created: {output_path}')
-    print(f'JSON file created: {json_output_path}')
-
 def main():
     api_key = "AIzaSyDlgPeD6BZ16dVTn9xiKl_vq41U1gzNENI"
     client = Client(api_key)
