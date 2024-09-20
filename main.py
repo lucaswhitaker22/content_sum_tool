@@ -5,7 +5,7 @@ from generate_lecture import Lecture
 import markdown
 import json
 import logging
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -13,28 +13,56 @@ logger = logging.getLogger(__name__)
 
 
 '''
-  {
+    {
         "format": "Lecture",
-        "date": date.today()- timedelta(days=4),
+        "date": datetime.strptime("09/12/24","%m/%d/%y"),
+        "course":"SYSC 4101",
+        "title":"Definitions 1",
+        "path":"input/SYSC4101-5105_Definitions_PI.pdf"
+    },
+    {
+        "format": "Lecture",
+        "date": datetime.strptime("09/17/24", "%m/%d/%y"),
         "course":"SYSC 4101",
         "title":"Definitions 2",
         "path":"input/SYSC4101-5105_Definitions_PII.pdf"
     },
     {
         "format": "Lecture",
-        "date": date.today(),
+        "date": datetime.strptime("09/19/24", "%m/%d/%y"),
         "course":"SYSC 4101",
         "title":"Input Domain",
-        "path":"input/SYSC4101-5105_Definitions_PII.pdf"
+        "path":"input/SYSC4101-5105_InputDomainTesting_PI.pdf"
     }
 '''
 content_args_list = [
+        {
+        "format": "Lecture",
+        "date": datetime.strptime("09/10/24","%m/%d/%y"),
+        "course":"SYSC 4101",
+        "title":"Context",
+        "path":"input/SYSC4101-5105_Context.pdf"
+    },
     {
         "format": "Lecture",
-        "date": date.today()- timedelta(days=7),
+        "date": datetime.strptime("09/12/24","%m/%d/%y"),
         "course":"SYSC 4101",
         "title":"Definitions 1",
         "path":"input/SYSC4101-5105_Definitions_PI.pdf"
+    },
+    {
+        "format": "Lecture",
+        "date": datetime.strptime("09/17/24", "%m/%d/%y"),
+        "course":"SYSC 4101",
+        "title":"Definitions 2",
+        "path":"input/SYSC4101-5105_Definitions_PII.pdf"
+    },
+    {
+        "format": "Lecture",
+        "date": datetime.strptime("09/19/24", "%m/%d/%y"),
+        "course":"SYSC 4101",
+        "title":"Input Domain",
+        "path":"input/SYSC4101-5105_InputDomainTesting_PI.pdf"
     }
 ]
 
@@ -284,7 +312,7 @@ def output_to_html_and_json(data, output_path):
     print(f'JSON file created/updated: {json_output_path}')
     print(f'HTML file created: {output_path}')
 def main():
-    api_key = "AIzaSyDlgPeD6BZ16dVTn9xiKl_vq41U1gzNENI"
+    api_key = "AIzaSyBI-cBe8ClKDTUrJuQ8x2i94OGen6XFbvs"
     client = Client(api_key)
     logger.info("Starting lecture generation process")
     for content_args in content_args_list:
