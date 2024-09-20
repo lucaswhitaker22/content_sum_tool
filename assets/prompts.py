@@ -54,12 +54,9 @@ Format the exam and answer key in Markdown, clearly separating questions and ans
 Compile a glossary of key terms and concepts:
 1. Identify 10-15 important terms or phrases from the lecture.
 2. For each entry, provide:
-   - A clear, concise definition (1-2 sentences)
-   - An example or additional context (where applicable)
+   - A clear, concise defintion (1-2 sentences)
 3. Organize terms alphabetically.
-4. Use Markdown formatting:
-   - Bold (**) for terms
-   - Italic (*) for emphasis within definitions
+4. Output as json, using keys 'term' and 'definition'
 Ensure the glossary covers crucial vocabulary and ideas essential for understanding the lecture material.
     """
 }

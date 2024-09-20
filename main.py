@@ -42,27 +42,6 @@ content_args_list = [
         "course":"SYSC 4101",
         "title":"Context",
         "path":"input/SYSC4101-5105_Context.pdf"
-    },
-    {
-        "format": "Lecture",
-        "date": datetime.strptime("09/12/24","%m/%d/%y"),
-        "course":"SYSC 4101",
-        "title":"Definitions 1",
-        "path":"input/SYSC4101-5105_Definitions_PI.pdf"
-    },
-    {
-        "format": "Lecture",
-        "date": datetime.strptime("09/17/24", "%m/%d/%y"),
-        "course":"SYSC 4101",
-        "title":"Definitions 2",
-        "path":"input/SYSC4101-5105_Definitions_PII.pdf"
-    },
-    {
-        "format": "Lecture",
-        "date": datetime.strptime("09/19/24", "%m/%d/%y"),
-        "course":"SYSC 4101",
-        "title":"Input Domain",
-        "path":"input/SYSC4101-5105_InputDomainTesting_PI.pdf"
     }
 ]
 

@@ -1,0 +1,211 @@
+{
+    "metadata": {
+        "overview": "This lecture explores the concept of input space partitioning, a technique used in software testing to effectively generate test cases. The lecture focuses on defining criteria and procedures for creating a comprehensive input model that captures the essential characteristics of the software under test.",
+        "topics": [
+            "Test Criteria Based on Structure",
+            "Basic Principles",
+            "Equivalence Classes",
+            "Boundary Value Analysis",
+            "Further Boundary Value Analysis",
+            "Step-by-Step Procedure",
+            "Characteristics",
+            "Blocks",
+            "Representative Values",
+            "On Characteristics",
+            "Template, Type-Specific Equivalence Classes",
+            "Quality of the Input Model",
+            "Criteria → Test Frames",
+            "All Combinations Criterion",
+            "Each Choice/Block Criterion",
+            "Pair-Wise Criterion",
+            "Base Choice Criterion",
+            "Criteria → Test Frames → Test Cases",
+            "Constraints",
+            "Constraints: [Error]",
+            "Constraints: [Single]",
+            "Conclusions",
+            "Functionality-Based Input Domain Modeling vs. Category Partition"
+        ],
+        "format": "Lecture",
+        "date": "2024-09-19T00:00:00",
+        "course": "SYSC 4101",
+        "title": "Input Domain",
+        "path": "input/SYSC4101-5105_InputDomainTesting_PI.pdf"
+    },
+    "notes": "# SYSC 4101 / SYSC 5105: Input Space Partitioning - Criteria (Part I)\n\n## Test Criteria Based on Structure [Offutt]\n\n- **Graphs:** Visual representations of program flow, data structures, or relationships.\n- **Logical Expressions:** Boolean expressions used to define conditions or constraints.\n- **Input Domain Characterization:** Describes the set of possible inputs for a software component or system.\n    - **Example:** A function that takes an integer as input might have an input domain of all integers.\n- **Syntactic Structures:**  The grammatical rules and patterns that govern the structure of inputs.\n\n## Basic Principles\n\n- **Choosing elements from the input space:**  Select test inputs based on the specification of the software under test.\n- **The specification provides information on:**\n    - **Input parameters:** The variables that the software accepts as input.\n    - **Allowed ranges of each parameter:**  The boundaries within which input values are valid. This is where **equivalence class partitioning** and **boundary value analysis** come into play.\n        - **Equivalence class partitioning:** Groups inputs into classes where the software is expected to behave the same.\n        - **Boundary value analysis:**  Focuses on testing values at the boundaries of input ranges, where errors are more likely.\n- **Equivalence classes:**\n    - **Assumption:**  The software behaves identically for all values within a given equivalence class.\n    - **Benefits:**\n        - **Completeness:** Ensures that all classes are exercised during testing.\n        - **No redundancy:** Avoids testing the same behavior multiple times with different inputs.\n- **Account for the test engineer expertise:**  The tester's knowledge of the software and its domain is crucial for selecting effective test inputs.\n\n## Basic Principles - Illustrated\n\n**Example:** A function that takes an integer as input and triggers different behaviors based on the input value:\n\n- **Input specification:**\n    - **< 0:** Behavior A is triggered.\n    - **[0, 10]:** Behavior B is triggered.\n    - **]10, 20]:** Behavior C is triggered.\n    - **> 20:** Behavior D is triggered.\n\n- **Equivalence classes:**\n    - **< 0:** All negative integers.\n    - **[0, 10]:** Integers between 0 and 10 (inclusive).\n    - **]10, 20]:** Integers between 10 and 20 (exclusive of 10, inclusive of 20).\n    - **> 20:** All integers greater than 20.\n\n- **Boundary value analysis:**  Focuses on testing values at the boundaries of each range.\n    - **< 0:**  -1, -2, etc.\n    - **[0, 10]:** 0, 10.\n    - **]10, 20]:** 11, 20.\n    - **> 20:** 21, 22, etc.\n\n- **Further boundary value analysis:**  Tests values around the boundaries.\n    - **< 0:** -1, -2, -3, etc.\n    - **[0, 10]:** 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11.\n    - **]10, 20]:** 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21.\n    - **> 20:** 21, 22, 23, etc.\n\n## Step-by-Step Procedure\n\n1. **Identify functions/functionalities to be tested:**  Determine the specific units of code that will be tested.\n2. **For each function, identify:**\n    - **Parameters:** The inputs that the function accepts.\n    - **Environment variables:**  Factors outside the function's control that can influence its behavior.\n3. **For each parameter or environment variable, identify characteristics:**\n    - **Characteristics:**  Describe the major properties of the parameter or environment variable from a testing perspective.\n    - **Plain language:**  Characteristics are expressed in plain language, not as specific values.\n    - **Orthogonal perspectives:**  Characteristics should represent different, independent aspects of the parameter or environment variable.\n4. **For each characteristic, identify blocks:**\n    - **Blocks:**  Partitions of the characteristic's domain into sets of values.\n    - **Equivalence classes:**  Blocks often correspond to equivalence classes.\n    - **Plain language:**  Describe blocks in plain language, avoiding specific values.\n5. **For each block, identify representative values:**\n    - **Values:**  Specific inputs that represent the block.\n    - **Test frames and test cases:**  Values are used only when creating test frames and test cases.\n\n**Input Model:** The entire process of identifying functions, parameters, environment variables, characteristics, blocks, and values creates the input model, which serves as the foundation for test design.\n\n## On Characteristics\n\n- **Types of values:**  Characteristics can specify various types of values, which may differ from the input parameter or environment variable type.\n- **Example:**  A string input to a program can be characterized by its length, encoding, structure (using regular expressions), and other properties.\n\n## Template, Type-Specific Equivalence Classes (and Boundaries)\n\n- **Range:**\n    - **One class:**  Values within the range.\n    - **Two classes:**  Values outside the range.\n    - **Boundaries:**  Additional classes can be added for values at the boundaries and immediately around them.\n- **String:**\n    - **Legal strings:**  At least one class for strings that are considered valid.\n    - **Illegal strings:**  At least one class for strings that are considered invalid.\n    - **Boundaries:**  Identify specific points where the definition of \"legal\" changes (e.g., the maximum length of a string).\n    - **Contents:**  Consider the contents of legal strings to identify further classes (e.g., strings containing only digits, strings containing special characters).\n- **Array:**\n    - **Legal arrays:**  One class for all valid arrays.\n    - **Empty array:**  One class for the empty array.\n    - **Larger arrays:**  One class for arrays exceeding the expected size.\n    - **Boundaries:**  Classes for values at the boundary of the array size and values immediately around it.\n    - **Structural contents:**  Classes based on the structure of the array's contents (if specified).\n- **Enumeration:**\n    - **Separate classes:**  Each value in an enumeration is a separate class.\n    - **Grouping:**  Values can be grouped into classes based on their behavior.\n\n## Quality of the Input Model\n\n- **It is paramount to check the Input Model!**\n- **Missing information:**  Ensure that the input model captures all relevant information about how the function behaves.\n- **Disjointness:**  Blocks within a characteristic should be disjoint, meaning that an input value can only belong to one block.\n- **Completeness:**  The blocks within a characteristic should cover the entire input space.\n- **Tool support:**  Tools can assist in verifying disjointness and completeness.\n\n## Criteria → Test Frames (Combination of Blocks)\n\n- **Test frames:**  Combinations of blocks from different characteristics.\n- **Criteria:**  Rules that define the adequacy of test frames.\n- **All Combinations Criterion:**  All possible combinations of blocks are used.\n- **Each Choice/Block Criterion:**  Each block from each characteristic is used at least once.\n- **Pair-Wise Criterion:**  Each block from one characteristic is combined with each block from other characteristics.\n- **Base Choice Criterion:**  A base block is chosen for each characteristic, and test frames are generated by varying one block at a time while keeping others constant.\n\n## Criteria → Test Frames → Test Cases\n\n- **Test frame:**  A specification of the conditions that test inputs should satisfy.\n- **Test case:**  A specific set of input values that meet the conditions defined by a test frame.\n- **Satisfy a criterion:**  A set of test frames should satisfy a chosen criterion to ensure adequate test coverage.\n- **From a test frame to a test case:**  Select input values that meet the conditions specified by the test frame.\n\n## Criteria Comparison (Subsumption)\n\n- **All Combinations Criterion:**  The most comprehensive criterion, but often impractical due to the large number of test cases.\n- **Pair-Wise Criterion:**  Provides a good balance between coverage and practicality.\n- **Base Choice Criterion:**  A more focused approach, suitable for testing specific aspects of the software.\n- **Each Choice Criterion:**  The least comprehensive criterion, but can be useful for initial testing.\n\n## Constraints Among Partitions\n\n- **Infeasible combinations:**  Some combinations of blocks may be infeasible due to constraints.\n- **Constraints:**  Rules that restrict the combinations of blocks.\n    - **Relations between blocks:**  Constraints can define relationships between blocks from different characteristics.\n    - **Properties:**  Properties associated with blocks can be used to define constraints.\n        - **Notation:**  Properties are specified using square brackets, e.g., `[PropertyName]`.\n        - **Selectors:**  Selectors can be used to specify conditions for selecting properties, e.g., `[if PropertyName]`.\n- **Special cases:**\n    - **[Error]:**  Indicates that a block represents an error condition.\n    - **[Single]:**  Indicates that a block represents a special or redundant condition that does not need to be combined with all other blocks.\n\n## Constraints\n\n- **[Error]:**\n    - **Assumption:**  Any call to the function using this block will result in the same error.\n    - **Combinations:**  This block is not combined with blocks from other categories.\n- **[Single]:**\n    - **Purpose:**  To describe special, unusual, or redundant conditions.\n    - **Combinations:**  This block is not combined with blocks from other categories.\n    - **Judgment:**  The tester determines that this block can be adequately tested with only one test case.\n\n## Conclusions\n\n- **Experience/expertise:**  Identifying parameters, environment variables, characteristics, and blocks heavily relies on the tester's experience and expertise.\n- **Explicit decisions:**  The technique makes testing decisions explicit, allowing for review and analysis.\n- **Automation:**  Once the initial steps are completed, the process of generating test frames and test cases can be automated.\n- **Test case reduction:**  Constraints help reduce the number of test cases required, making the technique practical for real-world testing.\n\n## Functionality-Based Input Domain Modeling vs. Category Partition\n\n- **Mapping of terminology:**  The terms used in the textbook (Functionality-Based Input Domain Modeling) and the original publication (Category Partition) are slightly different.\n    - **Tested function:**  Both terms refer to the same concept.\n    - **Parameters + Environment variables:**  In Category Partition, these are combined into a single concept called \"Parameters.\"\n    - **Characteristics:**  In Category Partition, these are called \"Categories.\"\n    - **Blocks:**  In Category Partition, these are called \"Choices.\"\n    - **Values:**  Both terms use the same concept.\n\n**Key Takeaways:**\n\n- Input space partitioning is a systematic approach for designing test cases based on the characteristics of inputs.\n- Equivalence class partitioning and boundary value analysis are important techniques for identifying test inputs.\n- Constraints help reduce the number of test cases required, making the technique practical for real-world testing.\n- The technique relies heavily on the tester's experience and expertise.",
+    "review": [
+        {
+            "answer": "Input Domain Characterization describes the input domain of the software under test, such as a method, component, or system. It helps identify the range of possible inputs that the software might encounter during execution.",
+            "question": "What is the purpose of Input Domain Characterization in software testing?"
+        },
+        {
+            "answer": "Equivalence class partitioning is a technique for dividing the input domain into groups of values that are expected to produce the same behavior. Boundary value analysis focuses on testing values at the boundaries of these equivalence classes, where faults are more likely to occur.",
+            "question": "Explain the difference between equivalence class partitioning and boundary value analysis."
+        },
+        {
+            "answer": "Characteristics are major properties of a parameter or environment variable that are relevant from the point of view of the function's behavior. They are stated in plain language and represent orthogonal perspectives, meaning they cover different aspects of the input.",
+            "question": "What are characteristics in the context of input space partitioning, and why are they important?"
+        },
+        {
+            "answer": "Blocks are partitions of a characteristic's domain into sets of values that are often equivalence classes or boundaries. They are used to represent different behaviors or outcomes associated with a characteristic.",
+            "question": "What are blocks in input space partitioning, and how are they related to characteristics?"
+        },
+        {
+            "answer": "The All Combinations Criterion requires testing all possible combinations of blocks from all characteristics. This criterion is the most comprehensive but can lead to a large number of test cases.",
+            "question": "Describe the All Combinations Criterion for test frame generation."
+        },
+        {
+            "answer": "Constraints are restrictions on the combinations of blocks that are feasible or meaningful. They can be used to reduce the number of test cases by eliminating infeasible or redundant combinations.",
+            "question": "What are constraints in input space partitioning, and how do they impact test case generation?"
+        },
+        {
+            "answer": "The technique is automated by using a criterion to generate test frames and then test cases. This automation helps to ensure that all necessary test cases are generated and that the testing process is efficient.",
+            "question": "How can input space partitioning be automated?"
+        }
+    ],
+    "keywords": [
+        {
+            "definition": "A set of input values that are assumed to produce the same behavior in the software under test.",
+            "term": "Equivalence Class"
+        },
+        {
+            "definition": "A technique for identifying test cases by considering the boundaries of input ranges and values immediately around those boundaries.",
+            "term": "Boundary Value Analysis"
+        },
+        {
+            "definition": "A technique for identifying test cases by dividing the input domain into a set of equivalence classes, where each class is assumed to produce the same behavior.",
+            "term": "Equivalence Class Partitioning"
+        },
+        {
+            "definition": "A set of conditions that a test case must satisfy, defined by a combination of blocks from different characteristics.",
+            "term": "Test Frame"
+        },
+        {
+            "definition": "A set of test cases that are designed to satisfy a specific testing criterion, such as the all combinations criterion or the pair-wise criterion.",
+            "term": "Test Set"
+        },
+        {
+            "definition": "A specific property of a parameter or environment variable that is relevant to the behavior of the software under test.",
+            "term": "Characteristic"
+        },
+        {
+            "definition": "A set of values that represent a specific characteristic, often derived from equivalence classes or boundaries.",
+            "term": "Block"
+        },
+        {
+            "definition": "A specific value that is used to represent a block in a test case.",
+            "term": "Value"
+        },
+        {
+            "definition": "A set of constraints that specify which combinations of blocks are feasible or infeasible, based on relationships between characteristics.",
+            "term": "Constraints"
+        },
+        {
+            "definition": "A special constraint that indicates that a block is considered unusual, redundant, or special and should not be combined with other blocks.",
+            "term": "Single Constraint"
+        },
+        {
+            "definition": "A special constraint that indicates that a block is expected to result in an error and should not be combined with other blocks.",
+            "term": "Error Constraint"
+        },
+        {
+            "definition": "A specific criterion used to select test cases, such as the all combinations criterion, the pair-wise criterion, or the base choice criterion.",
+            "term": "Testing Criterion"
+        },
+        {
+            "definition": "A set of test cases that are designed to satisfy a specific testing criterion, such as the all combinations criterion or the pair-wise criterion.",
+            "term": "Test Suite"
+        },
+        {
+            "definition": "A specific value that is used to represent a block in a test case.",
+            "term": "Test Input"
+        },
+        {
+            "definition": "A specific value that is used to represent a block in a test case.",
+            "term": "Test Case"
+        }
+    ],
+    "practice": {
+        "long": [
+            {
+                "answer": "The All Combinations Criterion is the most comprehensive, ensuring that all possible combinations of blocks from all characteristics are tested. However, it can lead to a large number of test cases, especially when dealing with many characteristics and blocks. The Pair-Wise Criterion aims to reduce the number of test cases by focusing on testing all possible combinations of blocks between pairs of characteristics. This approach is more efficient than the All Combinations Criterion while still providing a good level of test coverage. The Base Choice Criterion is a more lightweight approach, starting with a base set of blocks and then systematically varying one block at a time while keeping the others constant. This method is useful for quickly exploring the behavior of the system and identifying potential issues. The Each Choice/Block Criterion is the simplest, requiring that each block of each characteristic be tested at least once. This criterion provides basic coverage but may not be sufficient for complex systems.",
+                "question": "Compare and contrast the four test frame criteria: All Combinations Criterion, Pair-Wise Criterion, Base Choice Criterion, and Each Choice/Block Criterion. Discuss their strengths and weaknesses in terms of test coverage and efficiency."
+            },
+            {
+                "answer": "The concept of orthogonal perspectives is crucial in input space partitioning because it ensures that the test cases cover different aspects of the system's behavior. By identifying orthogonal perspectives, we can create test cases that are independent of each other, reducing redundancy and increasing the likelihood of uncovering defects. For example, when testing a function that takes a string as input, we can consider orthogonal perspectives such as string length, encoding, and structure. By testing different combinations of these perspectives, we can ensure that the function behaves correctly under various conditions.",
+                "question": "Explain the concept of orthogonal perspectives in input space partitioning and why it is important for creating effective test cases."
+            }
+        ],
+        "multiple": [
+            {
+                "answer": "A: {0,1,>1}",
+                "explanation": "This set represents the input domain for parameter A, including values 0, 1, and any value greater than 1.",
+                "options": [
+                    "A: {0,1,>1}",
+                    "B: {600,700,800}",
+                    "C: {swe,cs,isa,infs}",
+                    "if (x>y)"
+                ],
+                "question": "Which of the following represents an example of input domain characterization as described by Offutt's test criteria?"
+            },
+            {
+                "answer": "The behavior of the software is assumed to be the same for all the values of the class.",
+                "explanation": "This statement accurately describes the core principle of equivalence classes, where values within a class are expected to trigger the same behavior.",
+                "options": [
+                    "The behavior of the software is assumed to be the same for all the values of the class.",
+                    "Sense of completeness (each class is exercised)",
+                    "No redundancy (one input per class)",
+                    "Account for the test engineer expertise"
+                ],
+                "question": "Which of the following statements best describes the concept of equivalence classes in input space partitioning?"
+            },
+            {
+                "answer": "They represent orthogonal perspectives (≠ perspectives per category)",
+                "explanation": "Orthogonal perspectives ensure that each characteristic is tested independently, covering different aspects of the system's behavior.",
+                "options": [
+                    "They are stated in plain language (no actual value)",
+                    "Characteristics are “major properties",
+                    "They represent orthogonal perspectives (≠ perspectives per category)",
+                    "They are stated in plain language (no actual value)"
+                ],
+                "question": "Which of the following statements accurately describes a key characteristic of characteristics in input space partitioning?"
+            },
+            {
+                "answer": "Blocks are often equivalence classes / boundaries",
+                "explanation": "Blocks represent partitions of the characteristic's domain, often aligning with equivalence classes or boundaries.",
+                "options": [
+                    "Blocks are a partition of the characteristic's domain into sets of values",
+                    "Blocks are often equivalence classes / boundaries",
+                    "Blocks are a partition of the characteristic's domain into sets of values",
+                    "Blocks are often equivalence classes / boundaries"
+                ],
+                "question": "Which of the following statements accurately describes the relationship between blocks and equivalence classes in input space partitioning?"
+            },
+            {
+                "answer": "It is paramount to check the Input Model!",
+                "explanation": "The Input Model is the foundation of the testing process, and its accuracy is crucial for ensuring effective test case generation.",
+                "options": [
+                    "It is paramount to check the Input Model!",
+                    "Any missing information about how the function behaves?",
+                    "Are the blocks of a characteristic disjoint?",
+                    "Are the blocks of a characteristic complete?"
+                ],
+                "question": "Which of the following statements emphasizes the importance of verifying the Input Model in input space partitioning?"
+            }
+        ],
+        "short": [
+            {
+                "answer": "The All Combinations Criterion is the most comprehensive but can lead to a large number of test cases. The Pair-Wise Criterion reduces test cases by focusing on combinations between pairs of characteristics. The Base Choice Criterion starts with a base set and varies one block at a time. The Each Choice/Block Criterion is the simplest, requiring each block to be tested at least once.",
+                "question": "Briefly describe the four test frame criteria and their relative levels of comprehensiveness and efficiency."
+            },
+            {
+                "answer": "The Input Model is a representation of the system's input space, including parameters, environment variables, characteristics, and blocks. It serves as the foundation for generating test cases and ensures that the testing process covers all relevant aspects of the system's behavior.",
+                "question": "What is the Input Model in input space partitioning, and what is its significance in the testing process?"
+            },
+            {
+                "answer": "Constraints are rules that define which combinations of blocks are feasible or infeasible. They help to reduce the number of test cases by eliminating redundant or impossible combinations. For example, a constraint might specify that a particular block cannot be combined with another block due to conflicting conditions.",
+                "question": "Explain the role of constraints in input space partitioning and how they contribute to test case reduction."
+            }
+        ]
+    }
+}
