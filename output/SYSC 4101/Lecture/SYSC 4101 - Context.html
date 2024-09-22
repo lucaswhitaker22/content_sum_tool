@@ -1,0 +1,305 @@
+
+    <html>
+    <head>
+        <title>SYSC 4101 - Context</title>
+        <style>
+            body { 
+                font-family: Arial, sans-serif; 
+                line-height: 1.6; 
+                padding: 20px; 
+                background-color: #f9f9f9; 
+                color: #333; 
+            }
+            h1 { 
+                text-align: center; 
+                color: #4CAF50; 
+            }
+            h2, h3 { 
+                color: #333; 
+                margin-top: 20px; 
+            }
+            p { 
+                margin: 10px 0; 
+            }
+            .collapsible { 
+                background-color: #4CAF50; 
+                color: white; 
+                cursor: pointer; 
+                padding: 15px; 
+                width: 100%; 
+                border: none; 
+                text-align: left; 
+                outline: none; 
+                font-size: 16px; 
+                border-radius: 5px;
+                transition: background-color 0.3s;
+            }
+            .collapsible:hover { 
+                background-color: #45a049; 
+            }
+            .collapsible:after {
+                content: '\002B';
+                color: white;
+                font-weight: bold;
+                float: right;
+                margin-left: 5px;
+            }
+            .active:after {
+                content: "\2212";
+            }
+            .content {
+                padding: 0 15px;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.2s ease-out;
+                background-color: #e7f3fe;
+                border-left: 5px solid #4CAF50;
+                margin-bottom: 20px;
+                border-radius: 5px;
+            }
+            dl {
+                margin-left: 20px;
+            }
+            dt {
+                font-weight: bold;
+                margin-top: 10px;
+            }
+            dd {
+                margin-left: 20px;
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>SYSC 4101 - Context</h1>
+        <p><strong>Course:</strong> SYSC 4101</p>
+        <p><strong>Date:</strong> 2024-09-10 00:00:00</p>
+        <p><strong>Overview:</strong> This lecture explores the concepts of software verification and validation (V&V) in software engineering. It aims to clarify the distinction between verification and validation, highlighting their respective purposes, focuses, and testing methods. The lecture delves into various V&V techniques, including static and dynamic techniques, with a particular emphasis on symbolic execution and its application in software testing. The lecture also discusses the importance of testing in software development, emphasizing its role in ensuring software dependability and the significant costs associated with inadequate testing.</p>
+        <p><strong>Topics:</strong></p>
+        <ul><li>Verification vs. Validation</li><li>V&V Techniques</li><li>Symbolic Execution</li><li>Program Slicing</li><li>Model Checking</li><li>Abstract Interpretation</li><li>Inspection</li><li>Faults and Fault Handling</li><li>Goal of Testing</li><li>Cost of Testing</li><li>Software Bugs and Cost</li></ul>
+        <button class="collapsible">Lecture Notes</button>
+        <div class="content">
+            <h1>SYSC4101 / SYSC5105: Software Validation, Verification, and Testing</h1>
+<h2>Overview</h2>
+<h3>Context</h3>
+<p>Software validation, verification, and testing are crucial activities in the software development lifecycle. These processes ensure that the software system meets the specified requirements and performs as expected by users.</p>
+<h3>Definitions</h3>
+<h4>Software Verification</h4>
+<p><strong>IEEE Definition (Std 610.12.1990):</strong>
+- <strong>Process of evaluating a system or component to determine whether the products of a given development phase satisfy the conditions imposed at the start of that phase.</strong>
+- <strong>Checking whether the system adheres to properties termed as verification properties.</strong>
+- <strong>Constructing the system well.</strong></p>
+<h4>Software Validation</h4>
+<p><strong>IEEE Definition (Std 610.12.1990):</strong>
+- <strong>The process of evaluating a system or component during or at the end of the development process to determine whether it satisfies specified requirements.</strong>
+- <strong>Relationship with other software engineering activities (e.g., Requirements elicitation, Analysis).</strong>
+- <strong>Constructing the right system.</strong></p>
+<h2>Verification vs. Validation</h2>
+<h3>Purpose and Focus</h3>
+<p>| Aspect | Verification | Validation |
+|--------|--------------|------------|
+| Purpose | Ensure the product is built correctly. | Ensure the right product is built. |
+| Focus   | Internal consistency, correctness, compliance. | Meeting user needs and intended use. |
+| Testing Type | Static Testing (Reviews, inspections, walkthroughs, static analysis) | Dynamic Testing (Unit testing, integration testing, system testing, user acceptance testing (UAT)) |
+| Code Execution | Does not involve executing the code. | Involves running the code. |
+| Goal      | Ensure the system matches design specifications. | Ensure the system performs as expected by users. |</p>
+<h3>Examples</h3>
+<ul>
+<li><strong>Verification:</strong> Code reviews, requirement reviews, design analysis.</li>
+<li><strong>Validation:</strong> Code reviews, requirement reviews, design analysis.</li>
+</ul>
+<h2>Verification and Validation Techniques</h2>
+<h3>Dynamic Techniques</h3>
+<h4>Verification Testing (or simply, Testing)</h4>
+<ul>
+<li><strong>Inputs supplied to the system are valued (values instead of symbols).</strong></li>
+<li><strong>The most used V&amp;V technique.</strong></li>
+</ul>
+<h4>Symbolic Execution</h4>
+<ul>
+<li><strong>Inputs supplied to the system are symbolic (symbols, not values).</strong></li>
+<li><strong>Visualizing what is accomplished by a sequence of (assignment) statements.</strong></li>
+<li><strong>Compute an input/output function: any value of variable x in a procedure is a function f(a,b,c) of procedure parameters a, b and c. Symbolic execution computes f().</strong></li>
+</ul>
+<p><strong>Example Program:</strong>
+1. <code>read(x,y);</code>
+2. <code>z := x+y;</code>
+3. <code>x := x-y;</code>
+4. <code>z := x*z;</code>
+5. <code>write(z);</code></p>
+<p><strong>Execution with Values:</strong>
+- With <code>x=2</code> and <code>y=4</code>, <code>z = -12</code>.
+- With <code>x=α</code> and <code>y=β</code>, <code>z = α*α-β*β</code>.</p>
+<p><strong>Symbolic Execution Example:</strong>
+<code>python
+void foo(int x, int y) {
+    int t;
+    if(x&gt;y)
+        t=x+1;
+    else
+        t=y;
+    if(t&lt;=x)
+        // do something
+}</code>
+- Replace <code>x</code>, <code>y</code>, <code>t</code> with symbols <code>α</code>, <code>β</code>, <code>γ</code>, respectively.
+- After line 6:
+  - <code>α&gt;β =&gt; γ=α+1</code>
+  - <code>α≤β =&gt; γ=β</code>
+- Line 8 executes (path condition) if:
+  ① <code>α&gt;β =&gt; γ=α+1 ∧ γ≤α</code>
+  or
+  ② <code>α≤β =&gt; γ=β ∧ γ≤α</code>
+- Are expressions satisfiable?
+  ① <code>α+1≤α</code> is not satisfiable.
+  ② <code>α≤β ∧ β≤α</code> is satisfiable: <code>α=β</code>.</p>
+<h3>Static Techniques</h3>
+<h4>Program Slicing</h4>
+<ul>
+<li><strong>Given a variable and its location in the control flow of the program, build an executable subprogram from the original program by identifying and discarding the statements irrelevant to the computation of the value to be assumed by that variable at that point.</strong></li>
+</ul>
+<p><strong>Example Program:</strong>
+<code>python
+begin
+    read(x,y);
+    total := 0.0;
+    sum := 0.0;
+    if x&lt;=1 then sum := y else begin read(z); total := x*y end;
+    write(total,sum);
+end;</code>
+- Slice on the value of <code>z</code> at statement 12:
+  <code>python
+  begin
+      read(x,y);
+      if x&lt;=1 then sum := y else begin read(z); total := x*y end;
+      write(total,sum);
+  end;</code>
+- Slice on the value of <code>x</code> at statement 9:
+  <code>python
+  begin
+      read(x,y);
+      total := x*y;
+      write(total,sum);
+  end;</code></p>
+<h4>Model Checking</h4>
+<ul>
+<li><strong>Verifying properties of the system using models (e.g., finite state machines, petri nets).</strong></li>
+<li><strong>Exhaustively and automatically check whether a model meets a given specification.</strong></li>
+</ul>
+<p><strong>Example:</strong>
+- Verify that a state is always reachable (liveness property) or, on the contrary, never reachable.
+- Verify there is no deadlock.
+- Verify a program necessarily terminates.</p>
+<p><strong>Aside Note: Petri Nets</strong>
+Petri nets are a powerful tool for modeling concurrent systems and verifying their properties.</p>
+<h4>Abstract Interpretation</h4>
+<ul>
+<li><strong>With abstract interpretation, we make a sound approximation of the semantics of a program.</strong></li>
+<li><strong>Identify that all execution traces of the program are within bounds.</strong></li>
+</ul>
+<p><strong>Example Properties:</strong>
+- Out of bounds counters (e.g., in loops), Division by zero, …</p>
+<p><strong>Tool Support:</strong>
+- Tool support scales up: 1,000,000 lines of C (Airbus) ! 
+  - C++, Java, Ada support too.</p>
+<h4>Inspection</h4>
+<ul>
+<li><strong>Techniques aimed at systematically verifying software artifacts with the intent of finding as many defects as possible, as early as possible.</strong></li>
+<li><strong>Performed by a group of team workers.</strong></li>
+<li><strong>Faults often become more obvious to team members others than the original author.</strong></li>
+<li><strong>Works on source code but not only: any software artifact (e.g., requirements, diagrams, tests).</strong></li>
+</ul>
+<h2>Goal of Testing</h2>
+<h3>Main Goal</h3>
+<ul>
+<li><strong>The main goal of testing is to demonstrate that the software can be depended upon, i.e., sufficient dependability.</strong></li>
+<li><strong>No absolute certainty can be gained from testing because testing is necessarily finite.</strong></li>
+</ul>
+<h3>Integration with Other Verification Activities</h3>
+<ul>
+<li><strong>Testing should be integrated with other verification activities (e.g., static and dynamic V&amp;V techniques).</strong></li>
+</ul>
+<h3>Remarks</h3>
+<ul>
+<li><strong>No matter how rigorous we are, software is going to be faulty.</strong></li>
+<li><strong>Testing represents a substantial percentage of software development costs and time to market.</strong></li>
+<li><strong>Impossible to test under all operating conditions – based on incomplete testing, we must gain confidence that the system has the desired behavior.</strong></li>
+</ul>
+<h2>Cost of Testing</h2>
+<h3>Development Budget</h3>
+<ul>
+<li><strong>You are going to spend about half of your development budget on testing, whether you want to or not.</strong></li>
+</ul>
+<h3>Real-World Usage</h3>
+<ul>
+<li><strong>In real-world usage, testing is the main post-design activity.</strong></li>
+<li><strong>Restricting early testing usually increases costs.</strong></li>
+</ul>
+<h3>Industry Ratios</h3>
+<ul>
+<li><strong>In some organizations there are more lines of test code than application code !!!</strong></li>
+<li>Rule of thumb: one line of application code =&gt; two lines of test code.</li>
+<li>Industry ratio Test-LOC / App-LOC can be 2, 3, 4.</li>
+<li>Open source (reverse) ratio App-LOC / Test-LOC can be 2, 3 … 7.</li>
+</ul>
+<h2>Software Bugs - Cost</h2>
+<h3>National Institute of Standards and Technology (NIST)</h3>
+<ul>
+<li><strong>Studies in the manufacturing and transportation equipment sectors to assess the cost to the U.S. economy of inadequate software testing infrastructure.</strong></li>
+<li><strong>Results (annual cost):</strong></li>
+<li>Estimation: $5.85 billion.</li>
+<li>Projection to the entire U.S. economy: $59.5 billion.</li>
+</ul>
+<h3>Anecdotal Evidence</h3>
+<ul>
+<li><strong>Bug in telecom: 8-digit dollar cost in compensation.</strong></li>
+<li><strong>Debugging Fault: $100,000 for one</strong></li>
+<li><strong>Consortium for Information and Software Quality</strong></li>
+<li>Poor software quality in the USA = $2 trillions in 2020.</li>
+</ul>
+<h3>Examples of Software Bugs</h3>
+<ul>
+<li><strong>A 104 years old woman received an invitation to a kindergarten (1992).</strong></li>
+<li><strong>Interface misuse: Underground train in London left a station without the driver (1990).</strong></li>
+<li><strong>Over budget project: Failure in an automated luggage system in an airport (1995).</strong></li>
+<li><strong>NASA mission to Mars: Incorrect conversion from imperial to metric leads to loss of Mars satellite (1999).</strong></li>
+<li><strong>Ariane 5 Flight 501: The space rocket was destroyed (1996).</strong></li>
+<li><strong>Therac-25: Radiation therapy and X-ray machine killed several patients (1985-1987).</strong></li>
+</ul>
+<h3>Key Takeaway:</h3>
+<ul>
+<li><strong>Software validation, verification, and testing are essential for ensuring that software systems meet specified requirements and perform as expected by users.</strong></li>
+<li><strong>While no absolute certainty can be gained from testing, integrating various verification activities and using appropriate techniques like symbolic execution, model checking, and abstract interpretation can significantly enhance the reliability of software systems.</strong></li>
+</ul>
+<p>By understanding these concepts and techniques, developers can better manage the complexities of software development and ensure that their products are reliable and meet user needs effectively.</p>
+        </div>
+
+        <button class="collapsible">Keywords and Definitions</button>
+        <div class="content">
+            <dl><dt><strong>Software Verification</strong></dt><dd>The process of evaluating a system or component to determine whether the products of a given development phase satisfy the conditions imposed at the start of that phase.</dd><dt><strong>Software Validation</strong></dt><dd>The process of evaluating a system or component during or at the end of the development process to determine whether it satisfies specified requirements.</dd><dt><strong>Inspection</strong></dt><dd>A technique for verifying software artifacts with the intent of finding as many defects as possible, as early as possible.</dd><dt><strong>Verification Testing</strong></dt><dd>A technique that involves executing the system with inputs supplied to the system as values instead of symbols. It is the most common V&V technique.</dd><dt><strong>Symbolic Execution</strong></dt><dd>A technique that involves executing the system with inputs supplied to the system as symbols instead of values. It allows for analyzing the behavior of the system for a range of inputs.</dd><dt><strong>Static Techniques</strong></dt><dd>A technique that involves analyzing the system without executing it. It focuses on analyzing the structure and logic of the code.</dd><dt><strong>Dynamic Techniques</strong></dt><dd>A technique that involves analyzing the system by executing it with specific inputs and observing its behavior.</dd><dt><strong>Program Slicing</strong></dt><dd>A technique that involves building an executable subprogram from the original program by identifying and discarding statements irrelevant to the computation of a specific variable's value.</dd><dt><strong>Model Checking</strong></dt><dd>A technique that involves verifying properties of the system using models, such as finite state machines or Petri nets.</dd><dt><strong>Petri Nets</strong></dt><dd>A type of model used in model checking to represent concurrent programs and their interactions.</dd><dt><strong>Abstract Interpretation</strong></dt><dd>A technique that involves making a sound approximation of the semantics of a program by identifying execution traces within bounds.</dd><dt><strong>Goal of Testing</strong></dt><dd>The goal of testing is to demonstrate that the software can be depended upon, i.e., it has sufficient dependability.</dd><dt><strong>Sufficient Dependability</strong></dt><dd>The level of dependability required for a software system depends on its context and intended use.</dd><dt><strong>Cost of Testing</strong></dt><dd>Testing represents a significant portion of software development costs and time to market.</dd><dt><strong>Incomplete Testing</strong></dt><dd>It is impossible to test under all operating conditions, so testing aims to gain confidence that the system has the desired behavior based on incomplete testing.</dd></dl>
+        </div>
+
+        <button class="collapsible">Review Questions</button>
+        <div class="content">
+    <h3>Q: What is the key difference between software verification and validation?</h3><p>A: Verification focuses on ensuring the product is built correctly, adhering to internal consistency, correctness, and compliance. Validation, on the other hand, focuses on ensuring the product meets user needs and intended use, considering external factors.</p><h3>Q: Explain the difference between static and dynamic testing.</h3><p>A: Dynamic testing involves executing the code and observing its behavior in various scenarios, while static testing analyzes the code without execution, focusing on structural aspects and potential issues.</p><h3>Q: What is symbolic execution, and how does it differ from traditional dynamic testing?</h3><p>A: Symbolic execution is a dynamic testing technique that uses symbolic values instead of concrete values to analyze program behavior. It helps identify potential issues and understand the program's logic without executing it with specific inputs.</p><h3>Q: Describe the concept of program slicing and its purpose in software testing.</h3><p>A: Program slicing is a static analysis technique that extracts a relevant portion of the code related to a specific variable or computation. It helps isolate and understand the code responsible for a particular behavior or potential issue.</p><h3>Q: What is model checking, and how does it contribute to software verification?</h3><p>A: Model checking is a formal verification technique that uses models (e.g., finite state machines, Petri nets) to exhaustively and automatically check whether a system meets a given specification. It can verify properties like reachability, deadlock freedom, and termination.</p><h3>Q: Explain the concept of abstract interpretation and its role in software testing.</h3><p>A: Abstract interpretation is a static analysis technique that creates a sound approximation of a program's semantics. It helps identify potential issues by analyzing the program's behavior within certain bounds, even without executing it.</p><h3>Q: Describe the process of inspection in software testing and its benefits.</h3><p>A: Inspection is a static analysis technique that involves a group of team members systematically reviewing software artifacts (e.g., code, requirements, diagrams) to identify defects. It leverages the collective knowledge of the team to find issues that might be overlooked by individual developers.</p></div>
+        <button class="collapsible">Practice Exam</button>
+        <div class="content">
+        <h2>Short Answer Questions</h2><h3>Q: What is the purpose of software testing?</h3><p>A: Testing is a crucial part of software development, aiming to ensure the software meets its intended purpose and functions reliably. It involves executing the code and observing its behavior in various scenarios to identify defects and potential issues.</p><h3>Q: What is the significance of software testing in the software development lifecycle?</h3><p>A: Testing can be used to demonstrate the software's dependability, ensuring it functions reliably and meets the required quality standards. It helps identify and address potential issues before the software is released to users.</p><h2>Long Answer Questions</h2><h3>Q: Explain the key differences between software verification and validation, highlighting their respective goals and focuses.</h3><p>A: Verification aims to ensure the product is built correctly, focusing on internal consistency, correctness, and compliance with specifications. Validation, on the other hand, focuses on ensuring the product meets user needs and intended use, considering its interaction with the environment and its ability to fulfill its purpose.</p><h3>Q: Describe the concept of symbolic execution and its significance in software testing. Provide an example to illustrate its application.</h3><p>A: Symbolic execution involves replacing input values with symbolic variables, allowing for analysis of program behavior across various input combinations. This technique helps identify potential errors and uncover hidden program logic by analyzing the symbolic execution paths and their associated conditions.</p><h2>Multiple Choice Questions</h2><h3>Q: Which type of testing involves running the code to analyze its behavior and identify runtime errors?</h3><ul><li>Static Testing</li><li>Dynamic Testing</li><li>Model Checking</li><li>Symbolic Execution</li></ul><p>Correct Answer: Dynamic Testing</p><p>Explanation: Dynamic testing involves executing the code and observing its behavior in various scenarios, making it suitable for detecting runtime errors and validating functional aspects of the system.</p><h3>Q: Which static technique involves extracting a specific portion of the program related to a particular variable or computation?</h3><ul><li>Model Checking</li><li>Program slicing</li><li>Abstract interpretation</li><li>Inspection</li></ul><p>Correct Answer: Program slicing</p><p>Explanation: Program slicing focuses on extracting a specific portion of the program related to a particular variable or computation, allowing for targeted analysis and debugging.</p><h3>Q: Which statement accurately reflects the limitations and goals of software testing?</h3><ul><li>It is essential to test all possible scenarios to ensure complete system reliability.</li><li>Testing is only necessary for complex systems with multiple functionalities.</li><li>It is impossible to test all possible scenarios, but we can gain confidence in the system's behavior through thorough testing.</li><li>Testing is a secondary activity that can be performed after the system is fully developed.</li></ul><p>Correct Answer: It is impossible to test all possible scenarios, but we can gain confidence in the system's behavior through thorough testing.</p><p>Explanation: Testing all possible scenarios is impractical, but a well-designed testing strategy can provide sufficient confidence in the system's behavior by covering critical aspects and edge cases.</p><h3>Q: What is the main goal of software testing?</h3><ul><li>To identify and eliminate all bugs and errors in the software.</li><li>To ensure that the software meets all user requirements.</li><li>To demonstrate that the software can be depended upon, ensuring sufficient dependability.</li><li>To provide a comprehensive documentation of the software's functionality.</li></ul><p>Correct Answer: To demonstrate that the software can be depended upon, ensuring sufficient dependability.</p><p>Explanation: The primary goal of testing is to demonstrate the software's dependability, ensuring it functions reliably and meets the required quality standards.</p><h3>Q: Which technique involves a systematic review of software artifacts by a team of experts to identify defects and potential issues?</h3><ul><li>Testing</li><li>Debugging</li><li>Inspections</li><li>Symbolic Execution</li></ul><p>Correct Answer: Inspections</p><p>Explanation: Inspections involve a systematic review of software artifacts by a team of experts, aiming to identify defects and potential issues early in the development process.</p></div>
+        <script>
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                } 
+            });
+        }
+        </script>
+    </body>
+    </html>
+    

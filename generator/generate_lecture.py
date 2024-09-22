@@ -1,13 +1,19 @@
 import google.generativeai as genai
 from google.ai.generativelanguage_v1beta.types import content
-from client import Client
+from client import GeminiClient
+from perplexity import PerplexityClient
 import json
 import logging
 import requests
 from assets.prompts import prompts
+
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
+
 class Lecture:
     def __init__(self, client):
         self.client = client
@@ -33,7 +39,9 @@ class Lecture:
             "response_mime_type": "application/json",
         }
 
-        model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=generation_config)
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash", generation_config=generation_config
+        )
         prompt = prompts["metadata"]
 
         response = client.generate_content(model, prompt, uploaded_files)
@@ -46,20 +54,18 @@ class Lecture:
             logger.error("Error: Unable to parse JSON response for metadata")
             return None
 
-    def generate_notes(client, uploaded_files):
+    def generate_notes(file_txt):
         logger.info("Generating notes")
-        generation_config = {
-            "temperature": 0.3,
-            "top_p": 0.85,
-            "top_k": 32,
-            "max_output_tokens": 8192,
-            "response_mime_type": "text/plain"
-        }
 
-        model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=generation_config)
+        model = PerplexityClient()
         prompt = prompts["notes"]
 
-        notes = client.generate_content(model, prompt, uploaded_files)
+        messages = [
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": file_txt},
+        ]
+
+        notes = model.generate(messages)
         logger.debug("Notes generated successfully")
         return notes
 
@@ -90,7 +96,9 @@ class Lecture:
             "response_mime_type": "application/json",
         }
 
-        model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=generation_config)
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash", generation_config=generation_config
+        )
         prompt = prompts["review"]
 
         response = client.generate_content(model, prompt, uploaded_files)
@@ -98,7 +106,7 @@ class Lecture:
         try:
             python_obj = json.loads(response)
             logger.debug("Review questions generated successfully")
-            return python_obj['review']
+            return python_obj["review"]
         except json.JSONDecodeError:
             logger.error("Error: Unable to parse JSON response for review questions")
             return None
@@ -157,8 +165,10 @@ class Lecture:
             "response_mime_type": "application/json",
         }
 
-        model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=generation_config)
-        prompt = prompts['practice']
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash", generation_config=generation_config
+        )
+        prompt = prompts["practice"]
 
         response = client.generate_content(model, prompt, uploaded_files)
 
@@ -191,7 +201,9 @@ class Lecture:
             "response_mime_type": "application/json",
         }
 
-        model = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config=generation_config)
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash", generation_config=generation_config
+        )
         prompt = prompts["keywords"]
 
         response = client.generate_content(model, prompt, uploaded_files)

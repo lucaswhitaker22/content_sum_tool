@@ -4,7 +4,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-class Client:
+class GeminiClient:
     # Configure logging
     def __init__(self, api_key):
         self.api_key = api_key

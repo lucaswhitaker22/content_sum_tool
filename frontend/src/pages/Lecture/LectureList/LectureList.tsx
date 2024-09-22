@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Container, Title, Select, Table, Group, Button, Text } from '@mantine/core';
-import { IconChevronUp, IconChevronDown } from '@tabler/icons-react';
+import { Container, Form, Table, Button, Row, Col } from 'react-bootstrap';
+import { ChevronUp, ChevronDown } from 'react-bootstrap-icons';
 
 interface Lecture {
   _id: string;
@@ -17,8 +17,8 @@ interface Lecture {
 const LectureList: React.FC = () => {
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [filteredLectures, setFilteredLectures] = useState<Lecture[]>([]);
-  const [courseFilter, setCourseFilter] = useState<string | null>('');
-  const [formatFilter, setFormatFilter] = useState<string | null>('');
+  const [courseFilter, setCourseFilter] = useState<string>('');
+  const [formatFilter, setFormatFilter] = useState<string>('');
   const [sortBy, setSortBy] = useState<keyof Lecture['metadata']>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
@@ -81,31 +81,41 @@ const LectureList: React.FC = () => {
   const uniqueFormats = Array.from(new Set(lectures.map(lecture => lecture.metadata.format)));
 
   return (
-    <Container size="xl">
-      <Title order={1} mb="md">Lectures</Title>
-      <Group mb="md" gap="md">
-        <Select
-          value={courseFilter}
-          onChange={setCourseFilter}
-          placeholder="All Courses"
-          data={[{ value: '', label: 'All Courses' }, ...uniqueCourses.map(course => ({ value: course, label: course }))]}
-        />
-        <Select
-          value={formatFilter}
-          onChange={setFormatFilter}
-          placeholder="All Formats"
-          data={[{ value: '', label: 'All Formats' }, ...uniqueFormats.map(format => ({ value: format, label: format }))]}
-        />
-      </Group>
-      <Table>
+    <Container>
+      <h1 className="mb-4">Lectures</h1>
+      <Row className="mb-3">
+        <Col md={6}>
+          <Form.Select
+            value={courseFilter}
+            onChange={(e) => setCourseFilter(e.target.value)}
+          >
+            <option value="">All Courses</option>
+            {uniqueCourses.map(course => (
+              <option key={course} value={course}>{course}</option>
+            ))}
+          </Form.Select>
+        </Col>
+        <Col md={6}>
+          <Form.Select
+            value={formatFilter}
+            onChange={(e) => setFormatFilter(e.target.value)}
+          >
+            <option value="">All Formats</option>
+            {uniqueFormats.map(format => (
+              <option key={format} value={format}>{format}</option>
+            ))}
+          </Form.Select>
+        </Col>
+      </Row>
+      <Table striped bordered hover>
         <thead>
           <tr>
             {['title', 'course', 'date', 'format'].map((column) => (
               <th key={column} onClick={() => handleSort(column as keyof Lecture['metadata'])}>
-                <Group justify="space-between">
-                  <Text>{column.charAt(0).toUpperCase() + column.slice(1)}</Text>
-                  {sortBy === column && (sortOrder === 'asc' ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />)}
-                </Group>
+                <div className="d-flex justify-content-between align-items-center">
+                  {column.charAt(0).toUpperCase() + column.slice(1)}
+                  {sortBy === column && (sortOrder === 'asc' ? <ChevronUp /> : <ChevronDown />)}
+                </div>
               </th>
             ))}
             <th>Action</th>
@@ -119,14 +129,12 @@ const LectureList: React.FC = () => {
               <td>{new Date(lecture.metadata.date).toLocaleDateString()}</td>
               <td>{lecture.metadata.format}</td>
               <td>
-                <Group gap="xs">
-                  <Button component={Link} to={`/lecture/${lecture._id}`} variant="outline" size="xs">
-                    View
-                  </Button>
-                  <Button onClick={() => handleDelete(lecture._id)} color="red" variant="outline" size="xs">
-                    Delete
-                  </Button>
-                </Group>
+                <Button as={Link as any} to={`/lecture/${lecture._id}`} variant="outline-primary" size="sm" className="me-2">
+                  View
+                </Button>
+                <Button onClick={() => handleDelete(lecture._id)} variant="outline-danger" size="sm">
+                  Delete
+                </Button>
               </td>
             </tr>
           ))}
