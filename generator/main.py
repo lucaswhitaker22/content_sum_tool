@@ -1,10 +1,14 @@
 import os
+import sys
 from client import GeminiClient
 from generate_lecture import Lecture
 import markdown
+import requests
 import json
 import logging
 from datetime import date, timedelta, datetime
+import tempfile
+from urllib.parse import urlparse
 import fitz  # PyMuPDF
 # Configure logging
 logging.basicConfig(
@@ -41,49 +45,102 @@ content_args_list = [
         "format": "Lecture",
         "date": datetime.strptime("09/10/24", "%m/%d/%y"),
         "course": "SYSC 4101",
-        "title": "SYSC 4101 - Context",
+        "title": "Context",
         "path": "generator/input/SYSC4101-5105_Context.pdf",
+    },
+    {
+        "format": "Lecture",
+        "date": datetime.strptime("09/12/24","%m/%d/%y"),
+        "course":"SYSC 4101",
+        "title":"Definitions 1",
+        "path":"generator/input/SYSC4101-5105_Definitions_PI.pdf"
+    },
+        {
+        "format": "Lecture",
+        "date": datetime.strptime("09/17/24", "%m/%d/%y"),
+        "course":"SYSC 4101",
+        "title":"Definitions 2",
+        "path":"input/SYSC4101-5105_Definitions_PII.pdf"
+    },
+    {
+        "format": "Lecture",
+        "date": datetime.strptime("09/19/24", "%m/%d/%y"),
+        "course":"SYSC 4101",
+        "title":"Input Domain",
+        "path":"input/SYSC4101-5105_InputDomainTesting_PI.pdf"
     }
 ]
 
 
-def generate_lecture(client, content, uploaded_files, file_content):
+def generate_lecture(content):
+    api_key = "AIzaSyBI-cBe8ClKDTUrJuQ8x2i94OGen6XFbvs"
+    client = GeminiClient(api_key)
     logger.info(f"Generating lecture for {content['title']}")
+    
+    file_path = content['path']
+    temp_file = None
+    
+    try:
+        # Check if the path is a URL
+        if urlparse(file_path).scheme in ['http', 'https']:
+            # Download the PDF file
+            response = requests.get(file_path)
+            if response.status_code == 200:
+                # Create a temporary file to store the downloaded PDF
+                temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
+                temp_file.write(response.content)
+                temp_file.close()
+                file_path = temp_file.name
+            else:
+                raise Exception(f"Failed to download PDF from URL: {file_path}")
+        
+        # Ensure the file exists
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"PDF file not found: {file_path}")
+        
+        file_content = extract_text_from_pdf(file_path)
+        uploaded_file = client.upload_file(file_path)
+        client.retrieve_file(uploaded_file)
 
-    # Generate initial metadata
-    logger.debug("Generating metadata")
-    metadata = Lecture.generate_metadata(client, uploaded_files)
+        # Generate initial metadata
+        logger.debug("Generating metadata")
+        metadata = Lecture.generate_metadata(client, uploaded_file)
 
-    # Add content_args to the metadata without overwriting existing keys
-    for key, value in content.items():
-        if key not in metadata:
-            metadata[key] = value
+        # Add content_args to the metadata without overwriting existing keys
+        for key, value in content.items():
+            if key not in metadata:
+                metadata[key] = value
 
-    logger.debug("Generating notes")
-    notes = Lecture.generate_notes(file_content)
+        logger.debug("Generating notes")
+        notes = Lecture.generate_notes(file_content)
 
-    logger.debug("Generating review")
-    review = Lecture.generate_review(client, uploaded_files)
+        logger.debug("Generating review")
+        review = Lecture.generate_review(client, uploaded_file)
 
-    logger.debug("Generating keywords")
+        logger.debug("Generating keywords")
+        keywords = Lecture.generate_keywords(client, uploaded_file)
 
-    keywords = Lecture.generate_keywords(client, uploaded_files)
+        logger.debug("Generating practice")
+        practice = Lecture.generate_practice(client, uploaded_file)
 
-    logger.debug("Generating practice")
-    practice = Lecture.generate_practice(client, uploaded_files)
+        data = {
+            "metadata": metadata,
+            "notes": notes,
+            "review": review,
+            "keywords": keywords,
+            "practice": practice,
+        }
+        return json.dumps(data)
 
-    data = {
-        "metadata": metadata,
-        "notes": notes,
-        "review": review,
-        "keywords": keywords,
-        "practice": practice,
-    }
+    except Exception as e:
+        logger.error(f"Error generating lecture: {str(e)}")
+        raise
 
-    logger.info(f"Lecture generation completed for {content['title']}")
-    return data
-
-
+    finally:
+        # Clean up the temporary file if it was created
+        if temp_file and os.path.exists(temp_file.name):
+            os.unlink(temp_file.name)
+             
 def gen_html(data):
     logger.info(f"Generating HTML for {data['metadata']['title']}")
 
@@ -280,9 +337,6 @@ def extract_text_from_pdf(file_path):
     
     return text
 
-
-
-
 def output_to_html_and_json(data, output_path):
     # Ensure the output directory exists for JSON
     json_output_path = output_path.replace(".html", ".json").replace(
@@ -321,30 +375,46 @@ def output_to_html_and_json(data, output_path):
     print(f"JSON file created/updated: {json_output_path}")
     print(f"HTML file created: {output_path}")
 
-
-def main():
+def generate_from_input():
     api_key = "AIzaSyBI-cBe8ClKDTUrJuQ8x2i94OGen6XFbvs"
     client = GeminiClient(api_key)
     logger.info("Starting lecture generation process")
     for content_args in content_args_list:
         logger.info(f"Processing {content_args['title']}")
-            # Use the function with the file path from content_args
         file_path = content_args["path"]
-        file_content = extract_text_from_pdf(file_path)
-        uploaded_file = client.upload_file(file_path)
-        client.retrieve_file(uploaded_file)
-
         match content_args["format"]:
             case "Lecture":
                 data = generate_lecture(
-                    client, content_args, uploaded_file, file_content
+                    file_path, content_args
                 )
-                output_path = f"output/{data['metadata']['course']}/{data['metadata']['format']}/{data['metadata']['title']}.html"
+                output_path = f"generator/output/{data['metadata']['course']}/{data['metadata']['format']}/{data['metadata']['title']}.html"
                 output_to_html_and_json(data, output_path)
                 logger.info(f"Saved HTML and JSON files")
 
     logger.info("Lecture generation process completed")
 
+def main():
+    #generate_from_input()
+    content = {
+        "format": "Lecture",
+        "date": datetime.strptime("09/19/24", "%m/%d/%y"),
+        "course":"SYSC 4101",
+        "title":"Input Domain",
+        "path":"generator/input/SYSC4101-5105_InputDomainTesting_PI.pdf"
+    }
+    generate_lecture(content)
+
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        print("Usage: python main.py '<content_json>'", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        content_json = sys.argv[1]
+        content = json.loads(content_json)
+        result = generate_lecture(content)
+        print(result)
+    except Exception as e:
+        print(json.dumps({"error": str(e)}), file=sys.stderr)
+        sys.exit(1)

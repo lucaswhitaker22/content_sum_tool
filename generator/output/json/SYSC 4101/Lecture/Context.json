@@ -1,0 +1,195 @@
+{
+    "metadata": {
+        "overview": "This lecture focuses on software verification and validation (V&V) techniques, emphasizing their importance in ensuring software quality and dependability. It aims to clarify the distinction between verification and validation, explore various static and dynamic V&V techniques, and highlight the significance of testing in software development. The lecture also delves into the cost of software bugs and the need for robust testing strategies to mitigate risks.",
+        "topics": [
+            "Verification vs. Validation",
+            "V&V Techniques: Dynamic and Static",
+            "Symbolic Execution",
+            "Program Slicing",
+            "Model Checking",
+            "Abstract Interpretation",
+            "Inspection",
+            "Faults and Fault Handling",
+            "Goal of Testing",
+            "Cost of Testing",
+            "Software Bugs and their Cost"
+        ],
+        "format": "Lecture",
+        "date": "2024-09-10T00:00:00",
+        "course": "SYSC 4101",
+        "title": "Context",
+        "path": "generator/input/SYSC4101-5105_Context.pdf"
+    },
+    "notes": "# SYSC 4101 / SYSC 5105: Software Verification, Validation, and Testing\n\n## Context\n\n### Validation, Verification, and Testing\n\n- **Validation**: The process of evaluating a system or component to determine whether it satisfies the specified requirements.\n- **Verification**: The process of evaluating a system or component to determine whether the products of a given development phase satisfy the conditions imposed at the start of that phase.\n- **Testing**: A dynamic verification technique involving the execution of the system with specific inputs to observe its behavior.\n\n### Why Do We Test?\n\n- **Goal of Testing**:\n  - To demonstrate that the software can be depended upon, i.e., to ensure sufficient dependability.\n  - To show the presence of bugs, though it cannot prove their absence [E.W. Dijkstra, Turing Award Lecture, 1972].\n  - Testing is integrated with other verification activities to enhance software reliability.\n\n## Definitions (Verification vs. Validation)\n\n### IEEE Definitions (Std 610.12.1990)\n\n#### Software Verification\n- The process of evaluating a system or component to determine whether the products of a given development phase satisfy the conditions imposed at the start of that phase.\n- Checking whether the system adheres to properties termed as verification properties.\n- Ensuring the system is constructed well.\n\n#### Software Validation\n- The process of evaluating a system or component during or at the end of the development process to determine whether it satisfies specified requirements.\n- Ensuring the right system is built.\n- Relationship with other software engineering activities (e.g., Requirements elicitation, Analysis).\n\n## Verification vs Validation\n\n### Aspect Comparison\n\n| Aspect          | Verification                                                                 | Validation                                                                 |\n|-----------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------|\n| **Purpose**     | Ensure the product is built correctly                                       | Ensure the right product is built                                          |\n| **Focus**      | Internal consistency, correctness, compliance                              | Meeting user needs and intended use                                      |\n| **Testing Type**| Static Testing                                                             | Dynamic Testing                                                           |\n| **Methods**     | Reviews, inspections, walkthroughs, static analysis                       | Unit testing, integration testing, system testing, user acceptance testing (UAT) |\n| **Code Execution**| Does not involve executing the code                                     | Involves running the code                                                  |\n| **Goal**        | Ensure the system matches design specifications                            | Ensure the system performs as expected by users                          |\n| **Examples**    | Code reviews, requirement reviews, design analysis                          | Code reviews, requirement reviews, design analysis                        |\n\n## Definitions (V&V Techniques)\n\n### Dynamic Techniques\n\n- **Verification Testing (or simply, Testing)**:\n  - Inputs supplied to the system are valued (values instead of symbols).\n  - The most used V&V technique.\n- **Symbolic Execution**:\n  - Inputs supplied to the system are symbolic (symbols, not values).\n  - Visualizing what is accomplished by a sequence of assignment statements.\n\n#### Example of Symbolic Execution\n\n```c\nvoid foo(int x, int y) {\n    int t;\n    if(x > y)\n        t = x + 1;\n    else\n        t = y;\n    if(t <= x)\n        // do something\n}\n```\n\nReplace `x`, `y`, `t` with symbols `α`, `β`, `γ` respectively:\n- After line 6:\n  - `α > β => γ = α + 1`\n  - `α ≤ β => γ = β`\n- Line 8 executes if:\n  - `α > β => γ = α + 1 ∧ γ ≤ α` (not satisfiable)\n  - `α ≤ β => γ = β ∧ γ ≤ α` (satisfiable: `α = β`)\n\n### Static Techniques\n\n- **Program Slicing**:\n  - Given a variable and its location in the control flow of the program, build an executable subprogram by identifying and discarding irrelevant statements.\n  - Example: Slice on the value of `z` at statement 12 in a given program.\n\n```pascal\nbegin\n    read(x, y);\n    if x <= 1 then\n        sum := y;\n    else begin\n        read(z);\n        total := x * y;\n    end;\n    write(total, sum);\nend;\n```\n\nSlice on the value of `z` at statement 12:\n```pascal\nbegin\n    read(x, y);\n    if x <= 1 then\n        // do nothing\n    else begin\n        read(z);\n    end;\nend;\n```\n\n- **Model Checking**:\n  - Verifying properties of the system using models (e.g., finite state machines, Petri nets).\n  - Exhaustively and automatically check whether a model meets a given specification.\n  - Examples: Verify that a state is always reachable or never reachable, verify there is no deadlock.\n\n#### Example of Model Checking\n\n- The alternating-bit protocol designed to transmit information reliably over noisy telephone lines.\n- Model from 1969 paper by Bartlett, K.A., Scantlebury, R.A., and Wilkinson, P.T.\n\n### Abstract Interpretation\n\n- Making a sound approximation of the semantics of a program.\n- Identifying that all execution traces of the program are within bounds.\n- If a property is true on the approximation, it is true for the program.\n- Tool support scales up: e.g., 1,000,000 lines of C (Airbus).\n\n### Inspection\n\n- Techniques aimed at systematically verifying software artifacts to find as many defects as possible, as early as possible.\n- Performed by a group of team workers.\n- Works on source code but not only: any software artifact (e.g., requirements, diagrams, tests).\n\n## Fault Handling and Testing\n\n### Fault Handling\n\n- **Fault Tolerance**: Ensuring the system continues to operate correctly even when faults occur.\n- **Fault Detection**: Identifying faults in the system.\n- **Debugging**: Locating and fixing faults.\n- **Testing**: Part of fault detection and debugging.\n\n### Cost of Testing\n\n- Testing represents a substantial percentage of software development costs and time to market.\n- Restricting early testing usually increases costs.\n- Industry ratio Test-LOC / App-LOC can be 2, 3, 4; open source ratio App-LOC / Test-LOC can be 2, 3, … 7.\n\n## Software Bugs and Their Impact\n\n### Economic Impact\n\n- National Institute of Standards and Technology (NIST) study:\n  - Estimated annual cost due to inadequate software testing: $5.85 billion.\n  - Projected cost to the entire U.S. economy: $59.5 billion.\n- Consortium for Information and Software Quality:\n  - Poor software quality in the USA = $2 trillions in 2020.\n\n### Anecdotal Evidence\n\n- Bug in telecom: 8-digit dollar cost in compensation.\n- Debugging Fault: $100,000 for one!\n- Examples of costly bugs:\n  - A 104 years old woman received an invitation to a kindergarten (1992).\n  - Underground train in London left a station without the driver (1990).\n  - Failure in an automated luggage system in an airport (1995).\n  - NASA mission to Mars: Incorrect conversion from imperial to metric led to loss of Mars satellite (1999).\n  - Ariane 5 Flight 501: The space rocket was destroyed (1996).\n  - Therac-25: Radiation therapy and X-ray machine killed several patients (1985-1987).\n\n## Key Takeaways\n\n- **Verification vs Validation**:\n  - Verification ensures the system is built correctly, while validation ensures the right system is built.\n- **Testing Goals**:\n  - To demonstrate software dependability and show the presence of bugs, though not their absence.\n- **V&V Techniques**:\n  - Dynamic techniques include testing and symbolic execution.\n  - Static techniques include program slicing, model checking, abstract interpretation, and inspection.\n- **Cost and Impact**:\n  - Testing is a significant part of software development costs and time to market.\n  - Inadequate testing has substantial economic impacts.\n\n## Summary\n\nSoftware verification, validation, and testing are crucial activities in software development aimed at ensuring the quality and reliability of software systems. Understanding the differences between verification and validation, as well as the various techniques involved in these processes, is essential for effective software engineering. The economic impact of inadequate testing highlights the importance of integrating rigorous testing strategies into the development lifecycle.",
+    "review": [
+        {
+            "answer": "Verification focuses on ensuring the product is built correctly, while validation focuses on ensuring the product meets user needs and intended use.",
+            "question": "What is the fundamental difference between software verification and validation?"
+        },
+        {
+            "answer": "Verification typically involves static testing, which analyzes the code without executing it. Validation typically involves dynamic testing, which involves running the code and observing its behavior.",
+            "question": "How do the testing types used in verification and validation differ?"
+        },
+        {
+            "answer": "Symbolic execution is a dynamic testing technique that involves executing the code with symbolic inputs instead of concrete values. This allows for analyzing the program's behavior across a wider range of inputs.",
+            "question": "Explain the concept of symbolic execution and its significance in software testing."
+        },
+        {
+            "answer": "Program slicing is a static technique that aims to identify and isolate the parts of a program that are relevant to a specific variable or computation. This helps in simplifying the analysis and debugging process.",
+            "question": "Describe the purpose of program slicing in software testing."
+        },
+        {
+            "answer": "Model checking is a technique that uses formal models to exhaustively verify properties of a system. It can be used to detect potential errors, such as deadlocks or unreachable states.",
+            "question": "What is model checking, and how is it used in software testing?"
+        },
+        {
+            "answer": "Abstract interpretation is a static analysis technique that approximates the behavior of a program by considering a simplified representation of its states and transitions. It can be used to prove properties about the program's behavior, such as the absence of certain errors.",
+            "question": "Explain the concept of abstract interpretation and its application in software testing."
+        },
+        {
+            "answer": "Inspection is a systematic review of software artifacts, such as code, requirements, or design documents, by a team of experts. It aims to identify potential defects and ensure that the artifacts meet quality standards.",
+            "question": "Describe the process of inspection in software testing."
+        }
+    ],
+    "keywords": [
+        {
+            "definition": "The process of evaluating a system or component to determine whether the products of a given development phase satisfy the conditions imposed at the start of that phase.",
+            "term": "Software Verification"
+        },
+        {
+            "definition": "The process of evaluating a system or component during or at the end of the development process to determine whether it satisfies specified requirements.",
+            "term": "Software Validation"
+        },
+        {
+            "definition": "A technique for verifying software artifacts by systematically examining them to find as many defects as possible.",
+            "term": "Inspection"
+        },
+        {
+            "definition": "A technique for verifying software by executing the code and observing its behavior.",
+            "term": "Dynamic Testing"
+        },
+        {
+            "definition": "A technique for verifying software without executing the code, such as code reviews or static analysis.",
+            "term": "Static Testing"
+        },
+        {
+            "definition": "A technique for verifying software by analyzing the program's control flow and identifying statements that are irrelevant to the computation of a particular variable.",
+            "term": "Program Slicing"
+        },
+        {
+            "definition": "A technique for verifying software by using models to represent the system and checking whether the model meets a given specification.",
+            "term": "Model Checking"
+        },
+        {
+            "definition": "A technique for verifying software by executing the code with symbolic values instead of concrete values.",
+            "term": "Symbolic Execution"
+        },
+        {
+            "definition": "A type of model used in model checking to represent the behavior of a system.",
+            "term": "Petri Nets"
+        },
+        {
+            "definition": "A type of model used in model checking to represent the behavior of a system.",
+            "term": "Finite State Machine"
+        },
+        {
+            "definition": "A type of model used in model checking to represent the behavior of a system.",
+            "term": "Petri Nets"
+        },
+        {
+            "definition": "A type of model used in model checking to represent the behavior of a system.",
+            "term": "Finite State Machine"
+        },
+        {
+            "definition": "A technique for verifying software by approximating the semantics of the program and checking whether a property holds on the approximation.",
+            "term": "Abstract Interpretation"
+        },
+        {
+            "definition": "A type of testing that focuses on verifying the functionality of individual components of a system.",
+            "term": "Component Testing"
+        },
+        {
+            "definition": "A type of testing that focuses on verifying the functionality of the system as a whole.",
+            "term": "System Testing"
+        },
+        {
+            "definition": "A type of testing that focuses on verifying the interaction between different components of a system.",
+            "term": "Integration Testing"
+        }
+    ],
+    "practice": {
+        "long": [
+            {
+                "answer": "Verification focuses on internal consistency, correctness, and compliance with design specifications. It aims to ensure that the software is built correctly, adhering to defined rules and standards. Validation, on the other hand, focuses on meeting user needs and intended use. It aims to ensure that the software performs as expected by users and fulfills the intended purpose.",
+                "question": "Explain the key differences between software verification and validation, highlighting their respective focuses and goals."
+            }
+        ],
+        "multiple": [
+            {
+                "answer": "Dynamic Testing",
+                "explanation": "Dynamic testing involves executing the code to observe its behavior and identify defects. This contrasts with static testing, which analyzes the code without execution.",
+                "options": [
+                    "Static Testing",
+                    "Dynamic Testing",
+                    "Black Box Testing",
+                    "White Box Testing"
+                ],
+                "question": "Which type of testing involves running the code to observe its behavior and identify defects?"
+            },
+            {
+                "answer": "Symbolic execution",
+                "explanation": "Symbolic execution is a powerful technique that uses symbolic values instead of concrete ones to analyze the program's behavior. It helps identify potential issues and path conditions that might not be revealed by traditional testing.",
+                "options": [
+                    "Model checking",
+                    "Program slicing",
+                    "Symbolic execution",
+                    "Abstract interpretation"
+                ],
+                "question": "Which V&V technique uses symbolic values to analyze the program's behavior and identify potential issues and path conditions?"
+            },
+            {
+                "answer": "It is impossible to test all possible scenarios, so testing aims to gain confidence in the software's behavior.",
+                "explanation": "Testing can't guarantee the absence of bugs, but it aims to increase confidence in the software's behavior by uncovering potential issues. It's impossible to test every single scenario, so testing focuses on strategically selecting scenarios to maximize coverage.",
+                "options": [
+                    "Testing can prove the absence of bugs.",
+                    "Testing is only effective for small programs.",
+                    "Testing is a waste of time and resources.",
+                    "It is impossible to test all possible scenarios, so testing aims to gain confidence in the software's behavior."
+                ],
+                "question": "Which statement best describes the goal of software testing?"
+            },
+            {
+                "answer": "To ensure the system performs as expected by users.",
+                "explanation": "Validation focuses on ensuring that the software meets user needs and intended use. It aims to verify that the system behaves as expected by users in real-world scenarios.",
+                "options": [
+                    "To ensure the system adheres to design specifications.",
+                    "To identify all possible bugs in the software.",
+                    "To ensure the system is built correctly.",
+                    "To ensure the system performs as expected by users."
+                ],
+                "question": "What is the primary goal of software validation?"
+            },
+            {
+                "answer": "Program slicing",
+                "explanation": "Program slicing focuses on extracting a relevant portion of the code related to a specific variable or computation. It helps isolate and analyze specific parts of the code without considering the entire program.",
+                "options": [
+                    "Model checking",
+                    "Symbolic execution",
+                    "Abstract interpretation",
+                    "Program slicing"
+                ],
+                "question": "Which static technique involves extracting a relevant portion of the code related to a specific variable or computation?"
+            }
+        ],
+        "short": [
+            {
+                "answer": "Testing is a crucial part of software development, aiming to identify and address defects before deployment. It helps ensure the software meets quality standards, performs as expected, and satisfies user requirements.",
+                "question": "Why is software testing essential in the software development process?"
+            },
+            {
+                "answer": "Testing can be used to demonstrate that the software can be depended upon, providing confidence in its reliability and functionality. It helps ensure that the software meets the required level of dependability for its intended use.",
+                "question": "What is the main goal of software testing in terms of dependability?"
+            }
+        ]
+    }
+}

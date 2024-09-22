@@ -12,12 +12,14 @@ Generate comprehensive lecture notes from the PDF:
 2. Structure content hierarchically, following the lecture's organization.
 3. Include:
    - Key definitions and concepts
+   - Elaborate or add more information when needed
+   - Use full sentences/paragraphs when suitable
    - Relevant examples or case studies
    - Formulas or equations (use LaTeX formatting: $$equation$$)
    - Include tables when useful
    - Important points or takeaways (highlighted as **Key Takeaway:** )
 4. Create a scannable, easily readable summary suitable for student review.
-5. Aim for 1000-1500 words, balancing detail with conciseness.
+5. Aim for 1000-2000 words, balancing detail with conciseness.
 Output in Markdown format.
     """,
     "review": """
@@ -33,7 +35,7 @@ Develop a set of review questions based on the lecture content:
    - The correct answer
    - A brief explanation (1-2 sentences)
 4. Ensure questions progress from fundamental concepts to more advanced topics.
-Format as a JSON array with 'question', 'answer', and 'explanation' keys for each item.
+Format as JSON
     """,
 
     "practice": """

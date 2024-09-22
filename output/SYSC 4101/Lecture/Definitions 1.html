@@ -1,0 +1,267 @@
+
+    <html>
+    <head>
+        <title>Definitions 1</title>
+        <style>
+            body { 
+                font-family: Arial, sans-serif; 
+                line-height: 1.6; 
+                padding: 20px; 
+                background-color: #f9f9f9; 
+                color: #333; 
+            }
+            h1 { 
+                text-align: center; 
+                color: #4CAF50; 
+            }
+            h2, h3 { 
+                color: #333; 
+                margin-top: 20px; 
+            }
+            p { 
+                margin: 10px 0; 
+            }
+            .collapsible { 
+                background-color: #4CAF50; 
+                color: white; 
+                cursor: pointer; 
+                padding: 15px; 
+                width: 100%; 
+                border: none; 
+                text-align: left; 
+                outline: none; 
+                font-size: 16px; 
+                border-radius: 5px;
+                transition: background-color 0.3s;
+            }
+            .collapsible:hover { 
+                background-color: #45a049; 
+            }
+            .collapsible:after {
+                content: '\002B';
+                color: white;
+                font-weight: bold;
+                float: right;
+                margin-left: 5px;
+            }
+            .active:after {
+                content: "\2212";
+            }
+            .content {
+                padding: 0 15px;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.2s ease-out;
+                background-color: #e7f3fe;
+                border-left: 5px solid #4CAF50;
+                margin-bottom: 20px;
+                border-radius: 5px;
+            }
+            dl {
+                margin-left: 20px;
+            }
+            dt {
+                font-weight: bold;
+                margin-top: 10px;
+            }
+            dd {
+                margin-left: 20px;
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Definitions 1</h1>
+        <p><strong>Course:</strong> SYSC 4101</p>
+        <p><strong>Date:</strong> 2024-09-12 00:00:00</p>
+        <p><strong>Overview:</strong> This lecture introduces fundamental concepts in software testing, focusing on the distinction between faults, errors, and failures. It explains how these concepts relate to the observability and controllability of software systems, emphasizing the importance of all three for successful testing. The lecture also introduces the concept of test scaffolding, including test drivers, stubs, and oracles, and provides a simple example to illustrate their use in testing.</p>
+        <p><strong>Topics:</strong></p>
+        <ul><li>Faults, Errors, and Failures</li><li>Observability and Controllability</li><li>Reachability, Infection, and Propagation</li><li>Test Scaffolding</li><li>Test Drivers</li><li>Test Stubs</li><li>Test Oracles</li><li>Example of Test Scaffolding</li></ul>
+        <button class="collapsible">Lecture Notes</button>
+        <div class="content">
+            <h2>SYSC 4101 / SYSC 5105: Definitions and Concepts in Software Testing</h2>
+<h3>What are we looking for?</h3>
+<h4>Key Definitions</h4>
+<ul>
+<li><strong>Fault</strong>: A defect in a system, often referred to as a bug for historical reasons. Faults are committed by humans and can be exemplified by a faulty statement.</li>
+<li><strong>Example</strong>: A programmer accidentally writes an incorrect algorithm.</li>
+<li><strong>Error</strong>: Errors occur at runtime when some part of the system enters an unexpected state due to the activation of a fault.</li>
+<li><strong>Example</strong>: An erroneous state where a variable holds an unexpected value.</li>
+<li><strong>Failure</strong>: A failure of the system occurs when the delivered service deviates from what the system is intended to do.</li>
+<li><strong>Example</strong>: The system crashes or produces incorrect output.</li>
+</ul>
+<p><strong>Key Takeaway:</strong> The terms "fault," "error," and "failure" are distinct and important in software testing.</p>
+<h3>Fault → Error → Failure</h3>
+<h4>Conditions Necessary for Failure</h4>
+<p>For a failure to be observed, three conditions must be met:
+- <strong>Reachability</strong>: The location(s) in the program that contain the fault must be reached.
+  - <strong>Example</strong>: The faulty code must be executed.
+- <strong>Infection</strong>: The state of the program must be incorrect due to the fault.
+  - <strong>Example</strong>: The faulty code causes a variable to have an incorrect value.
+- <strong>Propagation</strong>: The infected state must propagate to cause some output of the program to be observed as incorrect.
+  - <strong>Example</strong>: The incorrect value affects the final output of the program.</p>
+<p><strong>Key Takeaway:</strong> All three conditions (reachability, infection, and propagation) are necessary for a failure to be observed.</p>
+<h3>Observability vs. Controllability</h3>
+<h4>Software Observability</h4>
+<ul>
+<li>Observability refers to how easy it is to observe the behavior of a program in terms of its outputs, effects on the environment, and other hardware and software components.</li>
+<li><strong>Example</strong>: Software that affects hardware devices or databases may have low observability.</li>
+<li>Observability relates to propagation, as it determines how easily the effects of a fault can be observed.</li>
+</ul>
+<h4>Software Controllability</h4>
+<ul>
+<li>Controllability refers to how easy it is to provide a program with the needed inputs, in terms of values, operations, and behaviors.</li>
+<li><strong>Example</strong>: Software controlled by keyboard inputs is easier to control than software controlled by hardware sensors or distributed software.</li>
+<li>Controllability relates to reachability and infection, as it affects how easily the faulty code can be executed and how easily the state can be made incorrect.</li>
+</ul>
+<p><strong>Key Takeaway:</strong> Both observability and controllability are crucial for effective software testing.</p>
+<h3>Test Scaffolding / Test Harness</h3>
+<h4>Components of Test Scaffolding</h4>
+<ul>
+<li><strong>Test Driver</strong>:</li>
+<li>A software component or test tool that replaces a component that takes care of the control and/or the calling of a software component.</li>
+<li>Executes a test case or a test suite/set.</li>
+<li><strong>Example</strong>: A driver that calls a function under test with specific input values.</li>
+<li><strong>Test Stub (Mock)</strong>:</li>
+<li>A skeletal or special-purpose implementation of a software module, used to develop or test a component that calls the stub or otherwise depends on it.</li>
+<li>Replaces a called component.</li>
+<li><strong>Example</strong>: Simulating a piece of code not yet ready.</li>
+<li><strong>Oracle</strong>:</li>
+<li>Assists in deciding whether a test outcome is successful or not.</li>
+<li>Has two important tasks:<ol>
+<li>Comparing the actual output against the expected output.</li>
+<li><strong>Example</strong>: Using an <code>assert()</code> statement.</li>
+<li>Deciding what the expected output is, given the test inputs of a test case.</li>
+<li><strong>Example</strong>: Deciding what to check in an <code>assert()</code> statement.</li>
+</ol>
+</li>
+</ul>
+<h3>Putting Things Together</h3>
+<h4>Program Under Test (PUT) with Test Scaffolding</h4>
+<ul>
+<li><strong>PUT</strong>: Can be a function/method, a class, a package/sub-system, or an entire software system.</li>
+<li><strong>Driver</strong>: Executes the test inputs and interacts with the PUT.</li>
+<li><strong>Stub(s)</strong>: Used by the PUT and provides necessary inputs or simulates dependencies.</li>
+<li><strong>Oracle</strong>: Compares expected outputs (either computed or provided) with actual outputs and provides a verdict (pass/fail).</li>
+</ul>
+<h4>A Simple Example</h4>
+<p>```c
+// File mySquareRoot.h
+double mySquareRoot(double num);</p>
+<p>// File stubForMySquareRoot.h
+void setReturnValue(double r);</p>
+<p>// File mySquareRoot-Stub.c</p>
+<h1>include "mySquareRoot.h"</h1>
+<h1>include "stubForMySquareRoot.h"</h1>
+<p>static double valueToReturn;</p>
+<p>double mySquareRoot(double n) {
+    return valueToReturn;
+}</p>
+<p>void setReturnValue(double r) {
+    valueToReturn = r;
+}</p>
+<p>// File root.h
+int root(double a, double b, double c, double <em>root1, double </em>root2);</p>
+<p>// File main.c (Driver)</p>
+<h1>include "root.h"</h1>
+<h1>include "stubForMySquareRoot.h"</h1>
+<p>int main() {
+    double a, b, c, root1, root2;
+    int result;
+    double expectedRoot1, expectedRoot2;
+    double epsilon = 0.000001;</p>
+<pre><code>// Test case 1
+setReturnValue(5); // Instructing the stub what to respond to root()
+a = -2; b = 1; c = 3;
+expectedRoot1 = -1; expectedRoot2 = 1.5;
+result = root(a, b, c, &amp;root1, &amp;root2);
+
+if ((result==1) &amp;&amp; (fabs(expectedRoot1-root1)&lt;epsilon) &amp;&amp; (fabs(expectedRoot2-root2)&lt;epsilon)) 
+    printf("test case 1 passes.\n");
+else 
+    printf("test case 1 fails.\n");
+
+return 0;
+</code></pre>
+<p>}
+```</p>
+<h3>Automated Test Infrastructure</h3>
+<h4>Examples of Automated Testing Frameworks</h4>
+<ul>
+<li><strong>JUnit (Java)</strong>
+  <code>java
+  public void evaluatesExpression()  {
+      Calculator calculator = new Calculator(); 
+      int sum = calculator.evaluate("1+2+3");
+      assertEquals(6, sum); 
+  }</code></li>
+<li><strong>Google’s C++ xUnit</strong>
+  <code>cpp
+  TEST(CalculatorTest, sumOneTwoThree) {
+      Calculator calculator;
+      int sum = calculator.evaluate("1+2+3");
+      EXPECT_EQ(6, sum); 
+  }</code></li>
+<li><strong>TTCN-3 (Testing and Test Control Notation)</strong>
+  ```ttcn3
+  template calculatorRequest request1 := {
+      input := “1+2+3” 
+  }</li>
+</ul>
+<p>template calculatorResponse response1 := {
+      output := 6 
+  }</p>
+<p>testcase test1() runs on MTCType {
+      calculator.send(request1);
+      alt {
+          [] calculator.receive(response1) {
+              setverdict(pass)
+          }
+          [] calculator.receive {
+              setverdict(fail)
+          }
+      }
+  }
+  ```</p>
+<p><strong>Key Takeaway:</strong> The syntax may change between different testing frameworks, but the core concept of deciding inputs and outputs remains consistent.</p>
+<h3>Summary</h3>
+<ul>
+<li><strong>Faults, Errors, and Failures</strong>: Understand the distinction between these terms and their roles in software testing.</li>
+<li><strong>Reachability, Infection, Propagation</strong>: These conditions are necessary for observing failures.</li>
+<li><strong>Observability and Controllability</strong>: These concepts are crucial for effective testing.</li>
+<li><strong>Test Scaffolding</strong>: Includes drivers, stubs, and oracles to facilitate testing.</li>
+<li><strong>Automated Testing</strong>: Various frameworks exist to automate the testing process.</li>
+</ul>
+<p>By understanding these concepts and tools, you can develop a robust approach to software testing.</p>
+        </div>
+
+        <button class="collapsible">Keywords and Definitions</button>
+        <div class="content">
+            <dl><dt><strong>Fault</strong></dt><dd>A defect in a system, often referred to as a "bug" in other contexts.</dd><dt><strong>Error</strong></dt><dd>An unexpected state entered by a system at runtime due to the activation of a fault.</dd><dt><strong>Failure</strong></dt><dd>A deviation of the delivered service from the intended behavior of the system.</dd><dt><strong>Software Observability</strong></dt><dd>The ease with which the behavior of a program can be observed through its outputs and effects on the environment.</dd><dt><strong>Software Controllability</strong></dt><dd>The ease with which a program can be provided with the necessary inputs to achieve desired values, operations, and behaviors.</dd><dt><strong>Reachability</strong></dt><dd>The location(s) in a program where a fault resides, which must be reached for the fault to be activated.</dd><dt><strong>Infection</strong></dt><dd>The state of a program becoming incorrect due to the activation of a fault.</dd><dt><strong>Propagation</strong></dt><dd>The propagation of an incorrect state within a program, potentially leading to observable errors.</dd><dt><strong>Test Scaffolding / Test Harness</strong></dt><dd>Infrastructure (software or hardware) used to execute test cases, including components like test drivers, stubs, and oracles.</dd><dt><strong>Test Driver</strong></dt><dd>A software component that replaces another component, taking care of control and calling operations for the replaced component.</dd><dt><strong>Test Stub</strong></dt><dd>A skeletal or special-purpose implementation of a software module used to simulate the behavior of a called component during testing.</dd><dt><strong>Test Oracle</strong></dt><dd>A component that assists in determining whether a test outcome is successful or not, often comparing actual outputs against expected outputs.</dd></dl>
+        </div>
+
+        <button class="collapsible">Review Questions</button>
+        <div class="content">
+    <h3>Q: What are the key differences between a fault, an error, and a failure in software systems?</h3><p>A: A fault is a defect in a system, while an error is an unexpected state caused by the activation of a fault. A failure occurs when the delivered service deviates from its intended behavior.</p><h3>Q: Explain the three conditions necessary for a failure to be observed: reachability, infection, and propagation.</h3><p>A: Reachability refers to the ability to reach the location in the program where the fault exists. Infection indicates that the program's state has become incorrect due to the fault. Propagation means that the incorrect state has spread to affect the system's output.</p><h3>Q: Define software observability and controllability, and explain how they relate to the concepts of reachability, infection, and propagation.</h3><p>A: Observability measures how easily we can understand a program's behavior based on its outputs and interactions with the environment. Controllability refers to how easily we can provide the program with the necessary inputs to test its behavior.</p><h3>Q: What are the roles of a test driver and a test stub in software testing?</h3><p>A: A test driver is a software component that executes test cases by providing input values and calling the program under test. A test stub is a simplified implementation of a component that simulates the behavior of a real component, allowing for testing without relying on the actual component.</p><h3>Q: What is the purpose of a test oracle in software testing?</h3><p>A: A test oracle is responsible for determining whether a test case has passed or failed. It compares the actual output of the program under test with the expected output, which can be provided by the tester or computed based on the test inputs.</p><h3>Q: What is test scaffolding or test harness, and what components are typically included?</h3><p>A: Test scaffolding, also known as a test harness, refers to the infrastructure, including software and hardware, that is set up to execute test cases. It typically includes a test driver, test stubs, and a test oracle.</p></div>
+        <button class="collapsible">Practice Exam</button>
+        <div class="content">
+        <h2>Short Answer Questions</h2><h3>Q: What is a test harness in software testing?</h3><p>A: A test harness is the infrastructure, including software and hardware, used to execute test cases. It typically includes components like test drivers, stubs, and oracles.</p><h3>Q: What is a test case in software testing?</h3><p>A: A test case is a specific set of inputs and expected outputs used to verify a particular aspect of the program's functionality.</p><h2>Long Answer Questions</h2><h3>Q: Explain the concepts of observability and controllability in software testing. How are they related to the three conditions necessary for a failure to be observed (reachability, infection, propagation)? Provide examples to illustrate your explanation.</h3><p>A: Observability is the ability to understand the behavior of a program based on its outputs and effects on the environment. Controllability is the ability to provide a program with the needed inputs to achieve desired outcomes. Observability is related to propagation, while controllability is related to reachability and infection. In the context of testing, observability helps determine if a fault has manifested as a failure, while controllability allows us to trigger specific program states to test for faults.</p><h2>Multiple Choice Questions</h2><h3>Q: What is the purpose of a test stub in software testing?</h3><ul><li>A test stub is a component that verifies the correctness of the program's output.</li><li>A test stub is a component that generates random input values for testing.</li><li>A test stub is a component that monitors the program's execution for errors.</li><li>A test stub simulates the behavior of a component that is not yet available or is too complex to be fully implemented.</li></ul><p>Correct Answer: A test stub simulates the behavior of a component that is not yet available or is too complex to be fully implemented.</p><p>Explanation: A test stub is a simplified version of a component, used to isolate and test other components without requiring the full functionality of the stubbed component.</p><h3>Q: What is the role of a test driver in software testing?</h3><ul><li>The test driver verifies the correctness of the program's output.</li><li>The test driver generates random input values for testing.</li><li>The test driver provides the necessary inputs and controls the execution of the program under test.</li><li>The test driver monitors the program's execution for errors.</li></ul><p>Correct Answer: The test driver provides the necessary inputs and controls the execution of the program under test.</p><p>Explanation: The test driver acts as the control mechanism for the test, setting up the environment, providing inputs, and triggering the execution of the program under test.</p><h3>Q: What is the function of a test oracle in software testing?</h3><ul><li>A test oracle generates random input values for testing.</li><li>A test oracle monitors the program's execution for errors.</li><li>A test oracle compares the actual output of the program with the expected output.</li><li>A test oracle simulates the behavior of a component that is not yet available or is too complex to be fully implemented.</li></ul><p>Correct Answer: A test oracle compares the actual output of the program with the expected output.</p><p>Explanation: The test oracle acts as the judge, determining if the program's output matches the expected behavior based on the given inputs.</p><h3>Q: What is the difference between a fault and an error in software testing?</h3><ul><li>A fault is an unexpected state reached during runtime, while an error is a defect in the system.</li><li>A fault is a defect in the system, while an error is a specific input that causes the program to crash.</li><li>A fault is a specific input that causes the program to crash, while an error is a defect in the system.</li><li>A fault is a defect in the system, while an error is an unexpected state reached during runtime due to the activation of a fault.</li></ul><p>Correct Answer: A fault is a defect in the system, while an error is an unexpected state reached during runtime due to the activation of a fault.</p><p>Explanation: A fault is a static defect in the code, while an error is a dynamic consequence of that defect occurring during program execution.</p><h3>Q: In the context of software testing, what does reachability refer to?</h3><ul><li>Reachability refers to the ability to detect the fault in the program.</li><li>Reachability refers to the ability to fix the fault in the program.</li><li>Reachability refers to the ability to reach the location in the program where the fault exists.</li><li>Reachability refers to the ability to prevent the fault from occurring in the program.</li></ul><p>Correct Answer: Reachability refers to the ability to reach the location in the program where the fault exists.</p><p>Explanation: Reachability ensures that the code containing the fault is actually executed during the test, allowing the fault to potentially manifest as an error.</p></div>
+        <script>
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                } 
+            });
+        }
+        </script>
+    </body>
+    </html>
+    

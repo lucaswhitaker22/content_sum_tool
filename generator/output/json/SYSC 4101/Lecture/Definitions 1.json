@@ -1,0 +1,181 @@
+{
+    "metadata": {
+        "overview": "This lecture introduces fundamental concepts in software testing, focusing on the distinction between faults, errors, and failures. It emphasizes the importance of observability and controllability in identifying and addressing these issues. The lecture also introduces the concept of test scaffolding, including test drivers, stubs, and oracles, as essential components for constructing effective test environments.",
+        "topics": [
+            "Fault, Error, and Failure",
+            "Observability and Controllability",
+            "Reachability, Infection, and Propagation",
+            "Test Scaffolding/Test Harness",
+            "Test Driver",
+            "Test Stub",
+            "Test Oracle",
+            "Putting Things Together",
+            "A Simple Example"
+        ],
+        "format": "Lecture",
+        "date": "2024-09-12T00:00:00",
+        "course": "SYSC 4101",
+        "title": "Definitions 1",
+        "path": "generator/input/SYSC4101-5105_Definitions_PI.pdf"
+    },
+    "notes": "## SYSC 4101 / SYSC 5105: Definitions and Concepts in Software Testing\n\n### Definitions—Part I\n\n#### Key Concepts\n- **Fault**: A defect in a system, often referred to as a bug. Faults are committed by humans and can be exemplified by a faulty statement.\n  - **Example**: A typo in the code that leads to incorrect behavior.\n- **Error**: Errors occur at runtime when some part of the system enters an unexpected state due to the activation of a fault.\n  - **Example**: An erroneous state where a variable holds an unexpected value.\n- **Failure**: A failure of the system occurs when the delivered service deviates from what the system is intended for.\n  - **Example**: The system crashes or produces incorrect output.\n\n**Key Takeaway:** The terms \"fault,\" \"error,\" and \"failure\" are distinct and important in software testing.\n\n### Fault → Error → Failure\n\n#### Conditions Necessary for Failure\nFor a failure to be observed, three conditions must be met:\n- **Reachability**: The location(s) in the program that contain the fault must be reached.\n  - **Example**: The faulty line of code must be executed.\n- **Infection**: The state of the program must be incorrect due to the fault.\n  - **Example**: The faulty code must alter the program's state in an unexpected way.\n- **Propagation**: The infected state must propagate to cause some output of the program to be observed as incorrect.\n  - **Example**: The incorrect state must affect the output or behavior of the program in a noticeable way.\n\n**Key Takeaway:** All three conditions (reachability, infection, and propagation) are necessary for a failure to be observed.\n\n### Observability vs. Controllability\n\n#### Software Observability\n- Observability refers to how easy it is to observe the behavior of a program in terms of its outputs, effects on the environment, and other hardware and software components.\n  - **Example**: Software that interacts with hardware devices, databases, or remote files may have low observability.\n- Observability relates to propagation, as it affects how easily the incorrect output can be observed.\n\n#### Software Controllability\n- Controllability refers to how easy it is to provide a program with the needed inputs, in terms of values, operations, and behaviors.\n  - **Example**: Software with inputs from keyboards is easier to control than software with inputs from hardware sensors or distributed software.\n- Controllability relates to reachability and infection, as it affects how easily the faulty code can be executed and the state can be made incorrect.\n\n**Key Takeaway:** Both observability and controllability are crucial for effective software testing.\n\n### Test Scaffolding / Test Harness\n\n#### Components of Test Scaffolding\n- **Test Driver**:\n  - A software component or test tool that replaces a component that takes care of the control and/or the calling of a software component.\n  - Executes a test case or a test suite/set.\n  - **Example**: A driver that calls a function under test with specific input values.\n- **Test Stub (Mock)**:\n  - A skeletal or special-purpose implementation of a software module, used to develop or test a component that calls the stub or otherwise depends on it.\n  - Replaces a called component.\n  - **Example**: Simulating a piece of code not yet ready.\n- **Oracle**:\n  - Assists in deciding whether a test outcome is successful or not.\n  - Compares the actual output against the expected output.\n  - Decides what the expected output is, given the test inputs of a test case.\n    - Often done by software for comparison and by humans for determining expected outputs.\n\n### Putting Things Together\n\n#### Program Under Test (PUT) and Test Infrastructure\n\n```markdown\nProgram Under Test\n  Can be a function/method, a class, a package/sub-system, an entire software.\nDriver\n  executes\n  Test inputs\n  Outputs\n  produces\n  creates / interacts with\nStub(s)\n  uses\n  produces\nOracle\n  Compares expected outputs (either computed or provided) and actual outputs.\n  Verdict (pass/fail)\n  Oracle uses inputs to determine expected outputs\n  Oracle collects actual outputs\n```\n\n#### A Simple Example\n\n```c\n// File mySquareRoot.h\ndouble mySquareRoot(double num);\n\n// File stubForMySquareRoot.h\nvoid setReturnValue(double r);\n\n// File mySquareRoot-Stub.c\n#include \"mySquareRoot.h\"\n#include \"stubForMySquareRoot.h\"\nstatic double valueToReturn;\n\ndouble mySquareRoot(double n) {\n    return valueToReturn;\n}\n\nvoid setReturnValue(double r) {\n    valueToReturn = r;\n}\n\n// File root.c\nint root(double a, double b, double c, double *root1, double *root2) {\n    double determinant = b*b - 4*a*c;\n    if (determinant > 0) {\n        *root1 = (-b + mySquareRoot(determinant))/(2*a);\n        *root2 = (-b - mySquareRoot(determinant))/(2*a);\n        return 1;\n    } else if (determinant == 0) {\n        *root1 = *root2 = -b/(2*a);\n        return 1;\n    } else {\n        return 0;\n    }\n}\n\n// File main.c (Driver)\n#include \"root.h\"\n#include \"stubForMySquareRoot.h\"\n\nint main() {\n    double a, b, c, root1, root2;\n    int result;\n    double expectedRoot1, expectedRoot2;\n    double epsilon = 0.000001;\n\n    // Test case 1\n    setReturnValue(5); // Instructing the stub what to respond to root()\n    a = -2; b = 1; c = 3;\n    expectedRoot1 = -1; expectedRoot2 = 1.5;\n    result = root(a, b, c, &root1, &root2);\n\n    if ((result==1) && (fabs(expectedRoot1-root1)<epsilon) && (fabs(expectedRoot2-root2)<epsilon))\n        printf(\"test case 1 passes.\\n\");\n    else\n        printf(\"test case 1 fails.\\n\");\n\n    return 0;\n}\n```\n\n### Automated Test Infrastructure\n\n#### Examples of Automated Testing Frameworks\n\n- **JUnit (Java)**\n  ```java\n  public void evaluatesExpression()  {\n      Calculator calculator = new Calculator(); \n      int sum = calculator.evaluate(\"1+2+3\");\n      assertEquals(6, sum); \n  }\n  ```\n\n- **Google’s C++ xUnit**\n  ```cpp\n  TEST(CalculatorTest, sumOneTwoThree) {\n      Calculator calculator;\n      int sum = calculator.evaluate(\"1+2+3\");\n      EXPECT_EQ(6, sum); \n  }\n  ```\n\n- **TTCN-3 (Testing and Test Control Notation)**\n  ```ttcn3\n  template calculatorRequest request1 := {\n      input := “1+2+3” \n  }\n  template calculatorResponse response1 := {\n      output := 6 \n  }\n  testcase test1() runs on MTCType {\n      calculator.send(request1);\n      alt {\n          [] calculator.receive(response1) {\n              setverdict(pass)\n          }\n          [] calculator.receive {\n              setverdict(fail)\n          }\n      }\n  }\n  ```\n\n**Key Takeaway:** Different testing frameworks have similar concepts but vary in syntax and implementation details.\n\n### Summary\n\n- **Faults, Errors, and Failures**: Understand the distinction between these terms and their roles in software testing.\n- **Reachability, Infection, and Propagation**: These conditions are necessary for a failure to be observed.\n- **Observability and Controllability**: These concepts are crucial for effective testing, relating to how easily the behavior of a program can be observed and controlled.\n- **Test Scaffolding**: Includes drivers, stubs, and oracles to facilitate testing.\n- **Automated Testing**: Various frameworks exist to automate the testing process, each with its own syntax but similar underlying concepts.\n\nBy understanding these definitions and concepts, you can better approach software testing with a structured and effective methodology.",
+    "review": [
+        {
+            "answer": "A fault is a defect in a system, often caused by human error, while an error occurs at runtime due to the activation of a fault, leading to an unexpected state. A failure occurs when the delivered service deviates from its intended behavior.",
+            "question": "Explain the difference between a fault, an error, and a failure in the context of software systems."
+        },
+        {
+            "answer": "Reachability refers to whether the faulty code can be executed, Infection refers to whether the faulty code causes the program state to be incorrect, and Propagation refers to whether the incorrect state affects the program's output.",
+            "question": "Describe the three conditions necessary for a failure to be observed, and explain what each condition represents."
+        },
+        {
+            "answer": "Observability is how easy it is to understand the behavior of a program based on its outputs and effects on the environment. Controllability is how easy it is to provide a program with the needed inputs to test its behavior.",
+            "question": "Define software observability and controllability, and explain how they relate to the three conditions for failure."
+        },
+        {
+            "answer": "A test driver is a component that executes test cases and interacts with the program under test. A test stub is a simplified implementation of a component that replaces a real component for testing purposes.",
+            "question": "What are the roles of a test driver and a test stub in test scaffolding?"
+        },
+        {
+            "answer": "A test oracle determines whether a test outcome is successful or not by comparing the actual output with the expected output. It can be implemented in software or by a human.",
+            "question": "What is the purpose of a test oracle, and how does it work?"
+        },
+        {
+            "answer": "The syntax of testing frameworks may change, but the fundamental principles of defining test cases, providing inputs, and verifying outputs remain the same.",
+            "question": "What aspects of automated testing remain consistent across different frameworks, despite variations in syntax?"
+        }
+    ],
+    "keywords": [
+        {
+            "definition": "A defect in a system, often referred to as a \"bug\" in other contexts.",
+            "term": "Fault"
+        },
+        {
+            "definition": "An unexpected state entered by a system at runtime due to the activation of a fault.",
+            "term": "Error"
+        },
+        {
+            "definition": "Occurs when the delivered service deviates from the intended behavior of the system.",
+            "term": "Failure"
+        },
+        {
+            "definition": "The location(s) in the program where a fault exists, which must be reached for the fault to be activated.",
+            "term": "Reachability"
+        },
+        {
+            "definition": "The state of the program must be incorrect due to the fault.",
+            "term": "Infection"
+        },
+        {
+            "definition": "The incorrect state caused by the fault must propagate to affect the program's output.",
+            "term": "Propagation"
+        },
+        {
+            "definition": "The ease with which the behavior of a program can be observed through its outputs and effects on the environment.",
+            "term": "Software Observability"
+        },
+        {
+            "definition": "The ease with which a program can be provided with the necessary inputs to control its behavior.",
+            "term": "Software Controllability"
+        },
+        {
+            "definition": "A software component or test tool that replaces a component, taking care of control and calling of the software component.",
+            "term": "Test Driver"
+        },
+        {
+            "definition": "A skeletal or special-purpose implementation of a software module used to develop or test a component that calls the stub.",
+            "term": "Test Stub"
+        },
+        {
+            "definition": "A component that assists in determining whether a test outcome is successful or not, comparing actual output to expected output.",
+            "term": "Test Oracle"
+        },
+        {
+            "definition": "Infrastructure (software and/or hardware) used to execute test cases.",
+            "term": "Test Scaffolding / Test Harness"
+        },
+        {
+            "definition": "A simple simulation of the behavior of a function, used when the actual function is not yet available.",
+            "term": "Stub"
+        }
+    ],
+    "practice": {
+        "long": [
+            {
+                "answer": "Observability refers to how easily we can understand the behavior of a program based on its outputs and interactions with the environment. It's about understanding what the program is doing, while controllability focuses on how easily we can influence the program's behavior by providing specific inputs.  Observability is crucial for diagnosing issues and understanding the program's overall state, while controllability is essential for testing and manipulating the program's execution.",
+                "question": "Explain the difference between Observability and Controllability in the context of software testing. How do these concepts relate to the three conditions necessary for a failure to be observed (Reachability, Infection, and Propagation)?"
+            }
+        ],
+        "multiple": [
+            {
+                "answer": "c",
+                "explanation": "A test stub is a simplified implementation of a component that is used to replace a real component during testing. It allows for testing of components that depend on the stubbed component without requiring the actual component to be fully functional.",
+                "options": [
+                    "A test stub is a component that verifies the correctness of the test cases.",
+                    "A test stub is a component that executes the test cases and provides the input values.",
+                    "A test stub is a simplified implementation of a component that is used to replace a real component during testing.",
+                    "A test stub is a component that generates the expected output for each test case."
+                ],
+                "question": "What is a test stub in the context of software testing?"
+            },
+            {
+                "answer": "a",
+                "explanation": "A test driver is a component that controls the execution of test cases and provides the necessary input values to the system under test. It acts as a wrapper around the system under test, orchestrating the execution of test cases and providing the required inputs.",
+                "options": [
+                    "A test driver is a component that verifies the correctness of the test cases.",
+                    "A test driver is a component that generates the expected output for each test case.",
+                    "A test driver is a component that provides the input values to the system under test.",
+                    "A test driver is a component that simulates the behavior of a real component during testing."
+                ],
+                "question": "What is a test driver in the context of software testing?"
+            },
+            {
+                "answer": "b",
+                "explanation": "A test oracle is responsible for determining whether a test case has passed or failed. It compares the actual output of the system under test with the expected output, and based on this comparison, it decides whether the test case has passed or failed.",
+                "options": [
+                    "A test oracle is a component that generates the test cases.",
+                    "A test oracle is a component that verifies the correctness of the test cases.",
+                    "A test oracle is a component that determines whether a test case has passed or failed.",
+                    "A test oracle is a component that provides the input values to the system under test."
+                ],
+                "question": "What is a test oracle in the context of software testing?"
+            },
+            {
+                "answer": "d",
+                "explanation": "The three conditions necessary for a failure to be observed are Reachability, Infection, and Propagation. Reachability refers to reaching the faulty code, Infection refers to the faulty code causing an incorrect state, and Propagation refers to the incorrect state affecting the program's output.",
+                "options": [
+                    "The three conditions necessary for a failure to be observed are Reachability, Infection, and Controllability.",
+                    "The three conditions necessary for a failure to be observed are Observability, Infection, and Propagation.",
+                    "The three conditions necessary for a failure to be observed are Reachability, Controllability, and Propagation.",
+                    "The three conditions necessary for a failure to be observed are Reachability, Infection, and Propagation."
+                ],
+                "question": "Which of the following are the three conditions necessary for a failure to be observed in a program?"
+            },
+            {
+                "answer": "c",
+                "explanation": "A test harness is a collection of components that support the execution of test cases. It includes the test driver, test stubs, and test oracle, which work together to provide a controlled environment for testing the system under test.",
+                "options": [
+                    "A test harness is a component that verifies the correctness of the test cases.",
+                    "A test harness is a component that generates the test cases.",
+                    "A test harness is a collection of components that support the execution of test cases.",
+                    "A test harness is a component that provides the input values to the system under test."
+                ],
+                "question": "What is a test harness in the context of software testing?"
+            }
+        ],
+        "short": [
+            {
+                "answer": "A test stub is a simplified implementation of a component that is used to replace a real component during testing. It allows for testing of components that depend on the stubbed component without requiring the actual component to be fully functional.",
+                "question": "What is a test stub?"
+            },
+            {
+                "answer": "A test driver is a component that controls the execution of test cases and provides the necessary input values to the system under test. It acts as a wrapper around the system under test, orchestrating the execution of test cases and providing the required inputs.",
+                "question": "What is a test driver?"
+            },
+            {
+                "answer": "A test oracle is responsible for determining whether a test case has passed or failed. It compares the actual output of the system under test with the expected output, and based on this comparison, it decides whether the test case has passed or failed.",
+                "question": "What is a test oracle?"
+            }
+        ]
+    }
+}

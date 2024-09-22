@@ -18,7 +18,7 @@ class Lecture:
     def __init__(self, client):
         self.client = client
 
-    def generate_metadata(client, uploaded_files):
+    def generate_metadata(client, uploaded_file):
         logger.info("Generating metadata")
         generation_config = {
             "temperature": 0.3,
@@ -44,7 +44,7 @@ class Lecture:
         )
         prompt = prompts["metadata"]
 
-        response = client.generate_content(model, prompt, uploaded_files)
+        response = client.generate_content(model, prompt, uploaded_file)
 
         try:
             python_obj = json.loads(response)
@@ -69,7 +69,7 @@ class Lecture:
         logger.debug("Notes generated successfully")
         return notes
 
-    def generate_review(client, uploaded_files):
+    def generate_review(client, uploaded_file):
         logger.info("Generating review questions")
         generation_config = {
             "temperature": 0.3,
@@ -101,7 +101,7 @@ class Lecture:
         )
         prompt = prompts["review"]
 
-        response = client.generate_content(model, prompt, uploaded_files)
+        response = client.generate_content(model, prompt, uploaded_file)
 
         try:
             python_obj = json.loads(response)
@@ -111,7 +111,7 @@ class Lecture:
             logger.error("Error: Unable to parse JSON response for review questions")
             return None
 
-    def generate_practice(client, uploaded_files):
+    def generate_practice(client, uploaded_file):
         logger.info("Generating practice exam")
         generation_config = {
             "temperature": 0.3,
@@ -170,7 +170,7 @@ class Lecture:
         )
         prompt = prompts["practice"]
 
-        response = client.generate_content(model, prompt, uploaded_files)
+        response = client.generate_content(model, prompt, uploaded_file)
 
         try:
             python_obj = json.loads(response)
@@ -180,7 +180,7 @@ class Lecture:
             logger.error("Error: Unable to parse JSON response for practice exam")
             return None
 
-    def generate_keywords(client, uploaded_files):
+    def generate_keywords(client, uploaded_file):
         logger.info("Generating keywords")
         generation_config = {
             "temperature": 0.3,
@@ -206,7 +206,7 @@ class Lecture:
         )
         prompt = prompts["keywords"]
 
-        response = client.generate_content(model, prompt, uploaded_files)
+        response = client.generate_content(model, prompt, uploaded_file)
 
         try:
             python_obj = json.loads(response)
