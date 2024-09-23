@@ -1,0 +1,27 @@
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  font-weight: bold; /* Make headers bold */
+  margin-bottom: 10px; /* Space out headers */
+}
+
+.markdown-content h1 {
+  font-size: 1.5rem; /* Smaller size for h1 */
+}
+
+.markdown-content h2 {
+  font-size: 1.25rem; /* Smaller size for h2 */
+}
+
+.markdown-content h3 {
+  font-size: 1.1rem; /* Smaller size for h3 */
+}
+
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  font-size: 1rem; /* Uniform size for smaller headers */
+}

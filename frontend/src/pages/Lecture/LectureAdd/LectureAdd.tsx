@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -8,43 +8,52 @@ const LectureAdd: React.FC = () => {
   const [date, setDate] = useState('');
   const [course, setCourse] = useState('');
   const [title, setTitle] = useState('');
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfUrl, setPdfUrl] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState<string>('');
   const [generatedData, setGeneratedData] = useState<any>(null);
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [saveMessage, setSaveMessage] = useState<string>('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (status === 'loading') {
+      timer = setInterval(() => {
+        setElapsedTime((prevTime) => prevTime + 1);
+      }, 1000);
+    } else {
+      setElapsedTime(0);
+    }
+    return () => clearInterval(timer);
+  }, [status]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setStatus('loading');
     setMessage('');
     setGeneratedData(null);
+    setSaveStatus('idle');
+    setSaveMessage('');
 
     try {
-      if (!pdfFile) {
-        throw new Error('No PDF file selected');
+      if (!pdfUrl) {
+        throw new Error('Please provide a PDF URL');
       }
 
-      // Read the PDF file as a data URL
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const pdfDataUrl = reader.result as string;
-
-        // Simulate creating a temporary URL by using the data URL directly
-        const requestBody = {
-          format,
-          date,
-          course,
-          title,
-          path: pdfDataUrl // Use the data URL as the path
-        };
-
-        const response = await axios.post('http://localhost:3000/api/generate-lecture', requestBody);
-        setStatus('success');
-        setMessage('Lecture generated successfully!');
-        setGeneratedData(response.data);
+      const requestBody = {
+        format,
+        date,
+        course,
+        title,
+        path: pdfUrl
       };
-      reader.readAsDataURL(pdfFile);
+
+      const response = await axios.post('http://localhost:3000/api/generate-lecture', requestBody);
+      setStatus('success');
+      setMessage('Lecture generated successfully!');
+      setGeneratedData(response.data);
     } catch (error) {
       console.error('Error:', error);
       setStatus('error');
@@ -55,19 +64,18 @@ const LectureAdd: React.FC = () => {
   const handleSave = async () => {
     if (!generatedData) return;
 
+    setSaveStatus('idle');
+    setSaveMessage('');
+
     try {
       await axios.post('http://localhost:3000/api/lectures', generatedData);
-      navigate('/home');
+      setSaveStatus('success');
+      setSaveMessage('Lecture saved successfully!');
+      setTimeout(() => navigate('/home'), 2000);
     } catch (error) {
       console.error('Error saving lecture:', error);
-      setStatus('error');
-      setMessage(error instanceof Error ? error.message : 'An error occurred while saving the lecture');
-    }
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setPdfFile(event.target.files[0]);
+      setSaveStatus('error');
+      setSaveMessage(error instanceof Error ? error.message : 'An error occurred while saving the lecture');
     }
   };
 
@@ -76,13 +84,24 @@ const LectureAdd: React.FC = () => {
       case 'loading':
         return (
           <Alert variant="info">
-            <Spinner animation="border" size="sm" /> Generating lecture...
+            <Spinner animation="border" size="sm" /> Generating lecture... (Elapsed time: {elapsedTime}s)
           </Alert>
         );
       case 'success':
         return <Alert variant="success">{message}</Alert>;
       case 'error':
         return <Alert variant="danger">{message}</Alert>;
+      default:
+        return null;
+    }
+  };
+
+  const renderSaveMessage = () => {
+    switch (saveStatus) {
+      case 'success':
+        return <Alert variant="success">{saveMessage}</Alert>;
+      case 'error':
+        return <Alert variant="danger">{saveMessage}</Alert>;
       default:
         return null;
     }
@@ -131,12 +150,14 @@ const LectureAdd: React.FC = () => {
             required
           />
         </Form.Group>
-        <Form.Group className="mb-3" controlId="pdfInput">
-          <Form.Label>PDF File</Form.Label>
+        <Form.Group className="mb-3" controlId="pdfUrlInput">
+          <Form.Label>PDF URL</Form.Label>
           <Form.Control
-            type="file"
-            onChange={handleFileChange}
-            accept=".pdf"
+            type="url"
+            value={pdfUrl}
+            onChange={(e) => setPdfUrl(e.target.value)}
+            placeholder="Enter PDF URL"
+            required
           />
         </Form.Group>
         <Button variant="primary" type="submit" disabled={status === 'loading'}>
@@ -153,8 +174,9 @@ const LectureAdd: React.FC = () => {
         <div className="mt-4">
           <h3>Generated Lecture Data:</h3>
           <pre>{JSON.stringify(generatedData, null, 2)}</pre>
-          <Button variant="success" onClick={handleSave} className="mt-3">
-            Save Lecture
+          {renderSaveMessage()}
+          <Button variant="success" onClick={handleSave} className="mt-3" disabled={saveStatus === 'success'}>
+            {saveStatus === 'success' ? 'Lecture Saved' : 'Save Lecture'}
           </Button>
         </div>
       )}
