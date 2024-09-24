@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Accordion, Button, Card, ListGroup, Row, Col, Badge, Table, Alert, Spinner } from 'react-bootstrap';
 import ReactMarkdown from 'react-markdown';
-import { Calendar3, ChevronDown, Search, ChevronUp, Book, ListUl } from 'react-bootstrap-icons';
+import { Calendar3, Link, ChevronDown, Search, ChevronUp, Book, ListUl } from 'react-bootstrap-icons';
 import Lecture from './Lecture.interface'
 import './LectureNotes.css'; // Import your custom CSS file
 import remarkGfm from 'remark-gfm';
@@ -34,58 +34,64 @@ const LectureNotes: React.FC<{ notes: string }> = ({ notes }) => {
   );
 };
 
-  const LectureHeader: React.FC<{ metadata: Lecture['metadata'] }> = ({ metadata }) => {
-    const [isExpanded, setIsExpanded] = useState(true);
-  
-    return (
-      <Card className="mb-4 shadow-sm">
-        <Card.Header as="h5" className="bg-primary text-white">
-          Lecture Information
-          <Button variant="link" className="text-white float-end" onClick={() => setIsExpanded(!isExpanded)}>
+const LectureHeader: React.FC<{ metadata: Lecture['metadata'] }> = ({ metadata }) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  return (
+    <Card className="mb-4 shadow-sm">
+      <Card.Header as="h5" className="bg-primary text-white d-flex justify-content-between align-items-center">
+        Lecture Information
+        <div>
+          <a href={metadata.path} target="_blank" rel="noopener noreferrer" className="text-white me-2">
+            <Link size={18} />
+          </a>
+          <Button variant="link" className="text-white p-0" onClick={() => setIsExpanded(!isExpanded)}>
             {isExpanded ? <ChevronUp /> : <ChevronDown />}
           </Button>
-        </Card.Header>
-        {isExpanded && (
-          <Card.Body>
-            <Card.Title as="h2" className="mb-3">{metadata.title}</Card.Title>
-            <Row className="mb-3">
-              <Col sm={4}>
-                <Card.Subtitle className="text-muted">
-                  <Book className="me-2" />
-                  {metadata.course}
-                </Card.Subtitle>
-              </Col>
-              <Col sm={4}>
-                <Card.Subtitle className="text-muted">
-                  <Calendar3 className="me-2" />
-                  {new Date(metadata.date).toLocaleDateString()}
-                </Card.Subtitle>
-              </Col>
-              <Col sm={4}>
-                <Badge bg="primary">{metadata.format}</Badge>
-              </Col>
+        </div>
+      </Card.Header>
+      {isExpanded && (
+        <Card.Body>
+          <Card.Title as="h2" className="mb-3">{metadata.title}</Card.Title>
+          <Row className="mb-3">
+            <Col sm={4}>
+              <Card.Subtitle className="text-muted">
+                <Book className="me-2" />
+                {metadata.course}
+              </Card.Subtitle>
+            </Col>
+            <Col sm={4}>
+              <Card.Subtitle className="text-muted">
+                <Calendar3 className="me-2" />
+                {new Date(metadata.date).toLocaleDateString()}
+              </Card.Subtitle>
+            </Col>
+            <Col sm={4}>
+              <Badge bg="primary">{metadata.format}</Badge>
+            </Col>
+          </Row>
+          <Card.Text>{metadata.overview}</Card.Text>
+          <Card.Text as="div">
+            <h5 className="mb-3">
+              <ListUl className="me-2" />
+              Topics:
+            </h5>
+            <Row xs={2} md={3} lg={4} className="g-2">
+              {metadata.topics.map((topic, index) => (
+                <Col key={index}>
+                  <Badge bg="light" text="dark" className="w-100 text-wrap py-2">
+                    {topic}
+                  </Badge>
+                </Col>
+              ))}
             </Row>
-            <Card.Text>{metadata.overview}</Card.Text>
-            <Card.Text as="div">
-              <h5 className="mb-3">
-                <ListUl className="me-2" />
-                Topics:
-              </h5>
-              <Row xs={2} md={3} lg={4} className="g-2">
-                {metadata.topics.map((topic, index) => (
-                  <Col key={index}>
-                    <Badge bg="light" text="dark" className="w-100 text-wrap py-2">
-                      {topic}
-                    </Badge>
-                  </Col>
-                ))}
-              </Row>
-            </Card.Text>
-          </Card.Body>
-        )}
-      </Card>
-    );
-  };
+          </Card.Text>
+        </Card.Body>
+      )}
+    </Card>
+  );
+};
+
   const LectureReview: React.FC<{ review: Lecture['review'] }> = ({ review }) => {
     const [isSectionExpanded, setIsSectionExpanded] = useState(false);
     const [activeKeys, setActiveKeys] = useState<string[]>([]);
