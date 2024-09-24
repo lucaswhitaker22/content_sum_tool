@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+axios.defaults.withCredentials = true;
 const LectureAdd: React.FC = () => {
   const [format, setFormat] = useState('Lecture');
   const [date, setDate] = useState('');
@@ -63,19 +63,43 @@ const LectureAdd: React.FC = () => {
 
   const handleSave = async () => {
     if (!generatedData) return;
-
+  
     setSaveStatus('idle');
     setSaveMessage('');
-
+  
     try {
-      await axios.post('http://localhost:3000/api/lectures', generatedData);
+      // Ensure the generatedData has the correct structure
+      const lectureData = {
+        metadata: {
+          overview: generatedData.metadata.overview,
+          topics: generatedData.metadata.topics,
+          format: format,
+          date: new Date(date),
+          course: course,
+          title: title,
+          path: pdfUrl
+        },
+        notes: generatedData.notes,
+        review: generatedData.review,
+        keywords: generatedData.keywords,
+        practice: generatedData.practice
+      };
+  
+      const response = await axios.post('http://localhost:3000/api/lectures', lectureData, {
+        withCredentials: true
+      });
+      
       setSaveStatus('success');
       setSaveMessage('Lecture saved successfully!');
       setTimeout(() => navigate('/lectures'), 2000);
     } catch (error) {
       console.error('Error saving lecture:', error);
       setSaveStatus('error');
-      setSaveMessage(error instanceof Error ? error.message : 'An error occurred while saving the lecture');
+      if (axios.isAxiosError(error) && error.response) {
+        setSaveMessage(error.response.data.message || 'An error occurred while saving the lecture');
+      } else {
+        setSaveMessage('An unexpected error occurred');
+      }
     }
   };
 

@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const lectureSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   metadata: {
     overview: String,
     topics: [String],

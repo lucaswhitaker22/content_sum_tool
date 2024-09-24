@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Form, Table, Button, Row, Col } from 'react-bootstrap';
 import { ChevronUp, ChevronDown } from 'react-bootstrap-icons';
-
+axios.defaults.withCredentials = true;
 interface Lecture {
   _id: string;
   metadata: {
