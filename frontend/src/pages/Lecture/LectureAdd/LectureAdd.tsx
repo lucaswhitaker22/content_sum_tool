@@ -71,7 +71,7 @@ const LectureAdd: React.FC = () => {
       await axios.post('http://localhost:3000/api/lectures', generatedData);
       setSaveStatus('success');
       setSaveMessage('Lecture saved successfully!');
-      setTimeout(() => navigate('/home'), 2000);
+      setTimeout(() => navigate('/lectures'), 2000);
     } catch (error) {
       console.error('Error saving lecture:', error);
       setSaveStatus('error');

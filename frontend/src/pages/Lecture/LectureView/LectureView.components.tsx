@@ -6,28 +6,34 @@ import ReactMarkdown from 'react-markdown';
 import { Calendar3, ChevronDown, Search, ChevronUp, Book, ListUl } from 'react-bootstrap-icons';
 import Lecture from './Lecture.interface'
 import './LectureNotes.css'; // Import your custom CSS file
+import remarkGfm from 'remark-gfm';
 
 
 const LectureNotes: React.FC<{ notes: string }> = ({ notes }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-  
-    return (
-      <Card className="mb-4 shadow-sm">
-        <Card.Header as="h5" className="bg-secondary text-white">
-          Lecture Notes
-          <Button variant="link" className="text-white float-end" onClick={() => setIsExpanded(!isExpanded)}>
-            {isExpanded ? <ChevronUp /> : <ChevronDown />}
-          </Button>
-        </Card.Header>
-        {isExpanded && (
-          <Card.Body>
-            <ReactMarkdown className="markdown-content">{notes}</ReactMarkdown>
-          </Card.Body>
-        )}
-      </Card>
-    );
-  };
-  
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <Card className="mb-4 shadow-sm">
+      <Card.Header as="h5" className="bg-secondary text-white">
+        Lecture Notes
+        <Button variant="link" className="text-white float-end" onClick={() => setIsExpanded(!isExpanded)}>
+          {isExpanded ? <ChevronUp /> : <ChevronDown />}
+        </Button>
+      </Card.Header>
+      {isExpanded && (
+        <Card.Body>
+          <ReactMarkdown 
+            className="markdown-content" 
+            remarkPlugins={[remarkGfm]}
+          >
+            {notes}
+          </ReactMarkdown>
+        </Card.Body>
+      )}
+    </Card>
+  );
+};
+
   const LectureHeader: React.FC<{ metadata: Lecture['metadata'] }> = ({ metadata }) => {
     const [isExpanded, setIsExpanded] = useState(true);
   
