@@ -13,9 +13,9 @@ Generate comprehensive lecture notes from the PDF:
 3. Include:
    - Key definitions and concepts
    - Elaborate or add more information when needed
-   - Use full sentences/paragraphs when suitable
+   - Use full sentences/paragraphs/steps when suitable
    - Relevant examples or case studies
-   - Formulas or equations (use LaTeX formatting: $$equation$$)
+   - Formulas, code or equations (use LaTeX formatting: $$equation$$)
    - Include tables when useful
    - Important points or takeaways (highlighted as **Key Takeaway:** )
 4. Create a scannable, easily readable summary suitable for student review.

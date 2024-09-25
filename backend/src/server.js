@@ -10,7 +10,8 @@ const multer = require("multer"); // Import multer
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const session = require("express-session");
-const User = require('./models/User');
+const User = require('./models/user');
+const Course = require('./models/course');
 
 app.use(express.json({ limit: '10mb' }));
 app.use(session({
@@ -237,6 +238,94 @@ app.delete("/api/lectures/:id", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error deleting lecture", error: error.message });
+  }
+});
+
+// Create a new course
+app.post("/api/courses", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+
+  try {
+    const courseData = req.body;
+    courseData.userId = req.user._id;
+
+    const newCourse = new Course(courseData);
+    const savedCourse = await newCourse.save();
+    res.status(201).json(savedCourse);
+  } catch (err) {
+    console.error("Error saving course:", err);
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Get all courses for the authenticated user
+app.get("/api/courses", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+
+  try {
+    const courses = await Course.find({ userId: req.user._id });
+    res.json(courses);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get a specific course by ID
+app.get("/api/courses/:id", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+
+  try {
+    const course = await Course.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!course) {
+      return res.status(404).json({ message: "Course not found or not owned by user" });
+    }
+    res.json(course);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Update a course
+app.put("/api/courses/:id", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+
+  try {
+    const updatedCourse = await Course.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user._id },
+      req.body,
+      { new: true }
+    );
+    if (!updatedCourse) {
+      return res.status(404).json({ message: "Course not found or not owned by user" });
+    }
+    res.json(updatedCourse);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Delete a course
+app.delete("/api/courses/:id", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+
+  try {
+    const course = await Course.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
+    if (!course) {
+      return res.status(404).json({ message: "Course not found or not owned by user" });
+    }
+    res.json({ message: "Course deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting course", error: error.message });
   }
 });
 
