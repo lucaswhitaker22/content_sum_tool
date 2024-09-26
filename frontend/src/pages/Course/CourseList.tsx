@@ -139,7 +139,7 @@ const CourseList: React.FC = () => {
                 </Button>
                 <Button
                   as={Link as any}
-                  to={`/courses/edit/${course._id}`}
+                  to={`/course/edit/${course._id}`}
                   variant="outline-primary"
                   size="sm"
                   className="me-2"

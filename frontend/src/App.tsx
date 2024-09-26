@@ -8,6 +8,7 @@ import LectureAdd from './pages/Lecture/LectureAdd/LectureAdd';
 
 import CoursePage from './pages/Course/CoursePage';
 import CourseList from './pages/Course/CourseList'
+import CourseEdit from './pages/Course/CourseEdit';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'katex/dist/katex.min.css';
@@ -77,6 +78,7 @@ const App: React.FC = () => {
         <Route path="/login" element={<Login/>} />
         <Route path="/course/add" element={<CoursePage/>} />
         <Route path="/course/list" element={<CourseList/>} />
+        <Route path="/course/edit/:id" element={<CourseEdit />} />
       </Routes>
     </Router>
   );
