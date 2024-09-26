@@ -11,7 +11,11 @@ const lectureSchema = new mongoose.Schema({
     topics: [String],
     format: String,
     date: Date,
-    course: String,
+    course: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Course',
+      required: true
+    },
     title: String,
     path: String
   },
@@ -39,7 +43,7 @@ const lectureSchema = new mongoose.Schema({
       question: String,
       answer: String
     }]
-    }
+  }
 });
 
 module.exports = mongoose.model('Lecture', lectureSchema);

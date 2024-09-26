@@ -2,11 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+
 axios.defaults.withCredentials = true;
+
+interface Course {
+  _id: string;
+  department: string;
+  number: string;
+  title: string;
+}
+
 const LectureAdd: React.FC = () => {
   const [format, setFormat] = useState('Lecture');
   const [date, setDate] = useState('');
-  const [course, setCourse] = useState('');
+  const [courseId, setCourseId] = useState('');
   const [title, setTitle] = useState('');
   const [pdfUrl, setPdfUrl] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -15,7 +24,12 @@ const LectureAdd: React.FC = () => {
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [saveMessage, setSaveMessage] = useState<string>('');
+  const [courses, setCourses] = useState<Course[]>([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -28,6 +42,15 @@ const LectureAdd: React.FC = () => {
     }
     return () => clearInterval(timer);
   }, [status]);
+
+  const fetchCourses = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/courses');
+      setCourses(response.data);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -43,11 +66,13 @@ const LectureAdd: React.FC = () => {
       }
 
       const requestBody = {
-        format,
-        date,
-        course,
-        title,
-        path: pdfUrl
+        metadata: {
+          format,
+          date,
+          course: courseId,
+          title,
+          path: pdfUrl
+        }
       };
 
       const response = await axios.post('http://localhost:3000/api/generate-lecture', requestBody);
@@ -68,26 +93,19 @@ const LectureAdd: React.FC = () => {
     setSaveMessage('');
   
     try {
-      // Ensure the generatedData has the correct structure
       const lectureData = {
+        ...generatedData,
         metadata: {
-          overview: generatedData.metadata.overview,
-          topics: generatedData.metadata.topics,
+          ...generatedData.metadata,
           format: format,
           date: new Date(date),
-          course: course,
+          course: courseId,
           title: title,
           path: pdfUrl
-        },
-        notes: generatedData.notes,
-        review: generatedData.review,
-        keywords: generatedData.keywords,
-        practice: generatedData.practice
+        }
       };
   
-      const response = await axios.post('http://localhost:3000/api/lectures', lectureData, {
-        withCredentials: true
-      });
+      const response = await axios.post('http://localhost:3000/api/lectures', lectureData);
       
       setSaveStatus('success');
       setSaveMessage('Lecture saved successfully!');
@@ -156,13 +174,18 @@ const LectureAdd: React.FC = () => {
         </Form.Group>
         <Form.Group className="mb-3" controlId="courseInput">
           <Form.Label>Course</Form.Label>
-          <Form.Control
-            type="text"
-            value={course}
-            onChange={(e) => setCourse(e.target.value)}
-            placeholder="Enter course code"
+          <Form.Select
+            value={courseId}
+            onChange={(e) => setCourseId(e.target.value)}
             required
-          />
+          >
+            <option value="">Select a course</option>
+            {courses.map((course) => (
+              <option key={course._id} value={course._id}>
+                {course.department} {course.number}: {course.title}
+              </option>
+            ))}
+          </Form.Select>
         </Form.Group>
         <Form.Group className="mb-3" controlId="titleInput">
           <Form.Label>Title</Form.Label>

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Container, Accordion, Button, Card, ListGroup, Row, Col, Badge, Table, Alert, Spinner } from 'react-bootstrap';
 import ReactMarkdown from 'react-markdown';
 import { Calendar3, Link, ChevronDown, Search, ChevronUp, Book, ListUl } from 'react-bootstrap-icons';
-import Lecture from './Lecture.interface'
+import {Lecture} from './Lecture.interface'
 import './LectureNotes.css'; // Import your custom CSS file
 import remarkGfm from 'remark-gfm';
 
@@ -57,7 +57,7 @@ const LectureHeader: React.FC<{ metadata: Lecture['metadata'] }> = ({ metadata }
             <Col sm={4}>
               <Card.Subtitle className="text-muted">
                 <Book className="me-2" />
-                {metadata.course}
+                {`${metadata.course.department} ${metadata.course.number}: ${metadata.course.title}`}
               </Card.Subtitle>
             </Col>
             <Col sm={4}>
@@ -91,7 +91,6 @@ const LectureHeader: React.FC<{ metadata: Lecture['metadata'] }> = ({ metadata }
     </Card>
   );
 };
-
   const LectureReview: React.FC<{ review: Lecture['review'] }> = ({ review }) => {
     const [isSectionExpanded, setIsSectionExpanded] = useState(false);
     const [activeKeys, setActiveKeys] = useState<string[]>([]);

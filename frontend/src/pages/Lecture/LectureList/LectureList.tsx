@@ -3,12 +3,21 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Form, Table, Button, Row, Col } from 'react-bootstrap';
 import { ChevronUp, ChevronDown } from 'react-bootstrap-icons';
+
 axios.defaults.withCredentials = true;
+
+interface Course {
+  _id: string;
+  department: string;
+  number: string;
+  title: string;
+}
+
 interface Lecture {
   _id: string;
   metadata: {
     title: string;
-    course: string;
+    course: Course;
     date: string;
     format: string;
   };
@@ -42,7 +51,7 @@ const LectureList: React.FC = () => {
 
   const filterAndSortLectures = () => {
     let filtered = lectures.filter(lecture => 
-      (courseFilter === '' || lecture.metadata.course === courseFilter) &&
+      (courseFilter === '' || lecture.metadata.course._id === courseFilter) &&
       (formatFilter === '' || lecture.metadata.format === formatFilter)
     );
 
@@ -51,6 +60,12 @@ const LectureList: React.FC = () => {
         return sortOrder === 'asc' 
           ? new Date(a.metadata.date).getTime() - new Date(b.metadata.date).getTime()
           : new Date(b.metadata.date).getTime() - new Date(a.metadata.date).getTime();
+      } else if (sortBy === 'course') {
+        const courseA = `${a.metadata.course.department} ${a.metadata.course.number}`;
+        const courseB = `${b.metadata.course.department} ${b.metadata.course.number}`;
+        return sortOrder === 'asc'
+          ? courseA.localeCompare(courseB)
+          : courseB.localeCompare(courseA);
       } else {
         return sortOrder === 'asc'
           ? a.metadata[sortBy].localeCompare(b.metadata[sortBy])
@@ -91,7 +106,9 @@ const LectureList: React.FC = () => {
           >
             <option value="">All Courses</option>
             {uniqueCourses.map(course => (
-              <option key={course} value={course}>{course}</option>
+              <option key={course._id} value={course._id}>
+                {course.department} {course.number}: {course.title}
+              </option>
             ))}
           </Form.Select>
         </Col>
@@ -125,7 +142,7 @@ const LectureList: React.FC = () => {
           {filteredLectures.map((lecture) => (
             <tr key={lecture._id}>
               <td>{lecture.metadata.title}</td>
-              <td>{lecture.metadata.course}</td>
+              <td>{`${lecture.metadata.course.department} ${lecture.metadata.course.number}: ${lecture.metadata.course.title}`}</td>
               <td>{new Date(lecture.metadata.date).toLocaleDateString()}</td>
               <td>{lecture.metadata.format}</td>
               <td>

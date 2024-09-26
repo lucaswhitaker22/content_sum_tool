@@ -122,12 +122,11 @@ mongoose
       });
     });
 // Example route to create a new lecture
+// Create a new lecture
 app.post("/api/lectures", async (req, res) => {
-  // Check if the user is authenticated
   if (!req.user) {
     return res.status(401).json({ message: "User not authenticated" });
   }
-
   try {
     const lectureData = req.body;
     lectureData.userId = req.user._id;
@@ -135,6 +134,12 @@ app.post("/api/lectures", async (req, res) => {
     // Validate the lecture data
     if (!lectureData.metadata || !lectureData.metadata.title || !lectureData.metadata.course) {
       return res.status(400).json({ message: "Invalid lecture data. Title and course are required." });
+    }
+
+    // Check if the course exists and belongs to the user
+    const course = await Course.findOne({ _id: lectureData.metadata.course, userId: req.user._id });
+    if (!course) {
+      return res.status(404).json({ message: "Course not found or not owned by user" });
     }
 
     const newLecture = new Lecture(lectureData);
@@ -145,60 +150,90 @@ app.post("/api/lectures", async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+// Update the lecture generation route
 app.post("/api/generate-lecture", async (req, res) => {
-  // Check if the user is authenticated
   if (!req.user) {
     return res.status(401).json({ message: "User not authenticated" });
   }
 
-  const pythonScriptPath = path.join(
-    __dirname,
-    "..",
-    "..",
-    "generator",
-    "main.py"
-  );
+  console.log("Received request body:", req.body);
+
+  const pythonScriptPath = path.join(__dirname, "..", "..", "generator", "main.py");
+  console.log("Python script path:", pythonScriptPath);
+
+  if (!fs.existsSync(pythonScriptPath)) {
+    return res.status(500).json({ message: "Python script not found" });
+  }
 
   const content = req.body;
-  // Add the user ID to the content
   content.userId = req.user._id;
+
+  // Validate input data
+  if (!content.metadata || !content.metadata.course || !content.metadata.title || !content.metadata.path) {
+    return res.status(400).json({ message: "Invalid input data" });
+  }
 
   const contentJson = JSON.stringify(content);
   const escapedContentJson = contentJson.replace(/"/g, '\\"');
   const command = `python "${pythonScriptPath}" "${escapedContentJson}"`;
+  console.log("Executing command:", command);
 
-  exec(command, async (error, stdout, stderr) => {
+  exec(command, { maxBuffer: 1024 * 1024 * 10 }, async (error, stdout, stderr) => {
     if (error) {
       console.error(`Error executing Python script: ${error}`);
-      return res
-        .status(500)
-        .json({ message: "Error generating lecture", error: error.message });
+      console.error(`Python script stderr: ${stderr}`);
+      return res.status(500).json({
+        message: "Error generating lecture",
+        error: error.message,
+        stderr: stderr
+      });
     }
 
-    try {
-      // Parse the Python script output
-      const lectureData = JSON.parse(stdout);
-      // Add the user ID to the lecture data
-      lectureData.userId = req.user._id;
+    if (stderr) {
+      console.error(`Python script stderr: ${stderr}`);
+    }
 
-      // Instead of saving, just return the generated data
+    console.log("Python script stdout:", stdout);
+
+    try {
+      const lectureData = JSON.parse(stdout);
+      lectureData.userId = req.user._id;
       res.status(200).json(lectureData);
     } catch (err) {
       console.error("Error processing lecture data:", err);
-      res.status(500).json({ message: "Error processing lecture data", error: err.message });
+      res.status(500).json({
+        message: "Error processing lecture data",
+        error: err.message,
+        stdout: stdout
+      });
     }
   });
 });
 
+// Get all lectures for the authenticated user
 app.get("/api/lectures", async (req, res) => {
-  // Check if the user is authenticated
   if (!req.user) {
     return res.status(401).json({ message: "User not authenticated" });
   }
-
   try {
-    const lectures = await Lecture.find({ userId: req.user._id });
+    const lectures = await Lecture.find({ userId: req.user._id }).populate('metadata.course');
     res.json(lectures);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get a specific lecture by ID
+app.get("/api/lectures/:id", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+  try {
+    const lecture = await Lecture.findOne({ _id: req.params.id, userId: req.user._id }).populate('metadata.course');
+    if (!lecture) {
+      return res.status(404).json({ message: "Lecture not found or not owned by user" });
+    }
+    res.json(lecture);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -242,14 +277,22 @@ app.delete("/api/lectures/:id", async (req, res) => {
 });
 
 // Create a new course
+// Create a new course
 app.post("/api/courses", async (req, res) => {
   if (!req.user) {
     return res.status(401).json({ message: "User not authenticated" });
   }
-
   try {
     const courseData = req.body;
     courseData.userId = req.user._id;
+    
+    // Validate grading scheme if provided
+    if (courseData.gradingScheme && courseData.gradingScheme.length > 0) {
+      const totalWeight = courseData.gradingScheme.reduce((sum, item) => sum + item.weight, 0);
+      if (Math.abs(totalWeight - 100) > 0.01) {
+        return res.status(400).json({ message: "Grading scheme weights must sum to 100%" });
+      }
+    }
 
     const newCourse = new Course(courseData);
     const savedCourse = await newCourse.save();
@@ -259,6 +302,37 @@ app.post("/api/courses", async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+
+// Update a course
+app.put("/api/courses/:id", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+  try {
+    const courseData = req.body;
+    
+    // Validate grading scheme if it's being updated
+    if (courseData.gradingScheme && courseData.gradingScheme.length > 0) {
+      const totalWeight = courseData.gradingScheme.reduce((sum, item) => sum + item.weight, 0);
+      if (Math.abs(totalWeight - 100) > 0.01) {
+        return res.status(400).json({ message: "Grading scheme weights must sum to 100%" });
+      }
+    }
+
+    const updatedCourse = await Course.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user._id },
+      courseData,
+      { new: true }
+    );
+    if (!updatedCourse) {
+      return res.status(404).json({ message: "Course not found or not owned by user" });
+    }
+    res.json(updatedCourse);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 
 // Get all courses for the authenticated user
 app.get("/api/courses", async (req, res) => {
@@ -291,26 +365,8 @@ app.get("/api/courses/:id", async (req, res) => {
   }
 });
 
-// Update a course
-app.put("/api/courses/:id", async (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({ message: "User not authenticated" });
-  }
 
-  try {
-    const updatedCourse = await Course.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user._id },
-      req.body,
-      { new: true }
-    );
-    if (!updatedCourse) {
-      return res.status(404).json({ message: "Course not found or not owned by user" });
-    }
-    res.json(updatedCourse);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
+
 
 // Delete a course
 app.delete("/api/courses/:id", async (req, res) => {

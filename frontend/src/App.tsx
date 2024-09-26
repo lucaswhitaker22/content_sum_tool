@@ -5,6 +5,10 @@ import LectureList from './pages/Lecture/LectureList/LectureList';
 import LectureView from './pages/Lecture/LectureView/LectureView';
 import Login from './pages/User/LoginPage';
 import LectureAdd from './pages/Lecture/LectureAdd/LectureAdd';
+
+import CoursePage from './pages/Course/CoursePage';
+import CourseList from './pages/Course/CourseList'
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'katex/dist/katex.min.css';
 
@@ -48,6 +52,8 @@ const App: React.FC = () => {
                 <Nav.Link as={Link} to="/lectures">Lectures</Nav.Link>
                 <Nav.Link as={Link} to="/lecture/new">Add Lecture</Nav.Link>
                 <Nav.Link as={Link} to="/about">About</Nav.Link>
+                <Nav.Link as={Link} to="/course/add">Courses</Nav.Link>
+
               </Nav>
               <Nav>
                 {user ? (
@@ -57,6 +63,7 @@ const App: React.FC = () => {
                   </>
                 ) : (
                   <Nav.Link href="http://localhost:3000/auth/google">Login with Google</Nav.Link>
+                  
                 )}
               </Nav>
             </Navbar.Collapse>
@@ -66,8 +73,10 @@ const App: React.FC = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/lectures" element={<LectureList />} />
         <Route path="/lecture/:id" element={<LectureView />} />
-        <Route path="/lecture/new" element={<LectureAdd />} />
+        <Route path="/lecture/add" element={<LectureAdd />} />
         <Route path="/login" element={<Login/>} />
+        <Route path="/course/add" element={<CoursePage/>} />
+        <Route path="/course/list" element={<CourseList/>} />
       </Routes>
     </Router>
   );

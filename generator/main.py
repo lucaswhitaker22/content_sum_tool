@@ -75,9 +75,28 @@ content_args_list = [
 def generate_lecture(content):
     api_key = "AIzaSyBI-cBe8ClKDTUrJuQ8x2i94OGen6XFbvs"
     client = GeminiClient(api_key)
-    logger.info(f"Generating lecture for {content['title']}")
     
-    file_path = content['path']
+    # Check if content is a string (JSON) and parse it
+    if isinstance(content, str):
+        try:
+            content = json.loads(content)
+        except json.JSONDecodeError:
+            return json.dumps({"error": "Invalid JSON input"})
+
+    # Ensure metadata exists
+    if 'metadata' not in content:
+        return json.dumps({"error": "Missing metadata"})
+
+    metadata = content['metadata']
+    
+    # Check for required fields
+    required_fields = ['title', 'path', 'course', 'date']
+    for field in required_fields:
+        if field not in metadata:
+            return json.dumps({"error": f"Missing required field: {field}"})
+
+    logger.info(f"Generating lecture for {metadata['title']}")
+    file_path = metadata['path']
     temp_file = None
     
     try:
