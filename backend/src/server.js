@@ -82,7 +82,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 mongoose
-  .connect("mongodb+srv://maclucas:dN6b25Lndp9Vwlyc@cluster0.crdb5.mongodb.net/test2?retryWrites=true&w=majority&appName=Cluster0",
+  .connect("mongodb+srv://maclucas:dN6b25Lndp9Vwlyc@cluster0.crdb5.mongodb.net/personal?retryWrites=true&w=majority&appName=Cluster0",
     {
       useNewUrlParser: true
     }
@@ -277,29 +277,26 @@ app.delete("/api/lectures/:id", async (req, res) => {
 });
 
 // Create a new course
-// Create a new course
 app.post("/api/courses", async (req, res) => {
   if (!req.user) {
     return res.status(401).json({ message: "User not authenticated" });
   }
+
   try {
     const courseData = req.body;
     courseData.userId = req.user._id;
-    
-    // Validate grading scheme if provided
-    if (courseData.gradingScheme && courseData.gradingScheme.length > 0) {
-      const totalWeight = courseData.gradingScheme.reduce((sum, item) => sum + item.weight, 0);
-      if (Math.abs(totalWeight - 100) > 0.01) {
-        return res.status(400).json({ message: "Grading scheme weights must sum to 100%" });
-      }
-    }
+
+    // Log the received course data
+    console.log("Received course data:", courseData);
 
     const newCourse = new Course(courseData);
     const savedCourse = await newCourse.save();
+    
+    console.log("Saved course:", savedCourse);
     res.status(201).json(savedCourse);
   } catch (err) {
     console.error("Error saving course:", err);
-    res.status(400).json({ message: err.message });
+    res.status(400).json({ message: err.message, stack: err.stack });
   }
 });
 

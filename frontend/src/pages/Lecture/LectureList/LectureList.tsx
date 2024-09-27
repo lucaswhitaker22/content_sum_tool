@@ -3,24 +3,19 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Form, Table, Button, Row, Col } from 'react-bootstrap';
 import { ChevronUp, ChevronDown } from 'react-bootstrap-icons';
+import { PrintButton } from '../LecturePrint/PrintButton';
+import { Lecture } from '../Lecture.interface';
 
 axios.defaults.withCredentials = true;
 
-interface Course {
+export interface Course {
   _id: string;
   department: string;
   number: string;
+  professor: string;
+  term: string;
+  year: number;
   title: string;
-}
-
-interface Lecture {
-  _id: string;
-  metadata: {
-    title: string;
-    course: Course;
-    date: string;
-    format: string;
-  };
 }
 
 const LectureList: React.FC = () => {
@@ -50,30 +45,49 @@ const LectureList: React.FC = () => {
   };
 
   const filterAndSortLectures = () => {
-    let filtered = lectures.filter(lecture => 
-      (courseFilter === '' || lecture.metadata.course._id === courseFilter) &&
-      (formatFilter === '' || lecture.metadata.format === formatFilter)
-    );
-
-    filtered.sort((a, b) => {
-      if (sortBy === 'date') {
-        return sortOrder === 'asc' 
-          ? new Date(a.metadata.date).getTime() - new Date(b.metadata.date).getTime()
-          : new Date(b.metadata.date).getTime() - new Date(a.metadata.date).getTime();
-      } else if (sortBy === 'course') {
-        const courseA = `${a.metadata.course.department} ${a.metadata.course.number}`;
-        const courseB = `${b.metadata.course.department} ${b.metadata.course.number}`;
-        return sortOrder === 'asc'
-          ? courseA.localeCompare(courseB)
-          : courseB.localeCompare(courseA);
-      } else {
-        return sortOrder === 'asc'
-          ? a.metadata[sortBy].localeCompare(b.metadata[sortBy])
-          : b.metadata[sortBy].localeCompare(a.metadata[sortBy]);
+    // Create a Map to store unique lectures by their _id
+    const uniqueLecturesMap = new Map<string, Lecture>();
+  
+    lectures.forEach(lecture => {
+      if (
+        (courseFilter === '' || lecture.metadata.course._id === courseFilter) &&
+        (formatFilter === '' || lecture.metadata.format === formatFilter)
+      ) {
+        // Use the lecture._id as the key to ensure uniqueness
+        uniqueLecturesMap.set(lecture._id, lecture);
       }
     });
-
-    setFilteredLectures(filtered);
+  
+    // Convert the Map values back to an array
+    const filtered = Array.from(uniqueLecturesMap.values());
+  
+    const sortedLectures = filtered.sort((a, b) => {
+      const aValue = getSortValue(a, sortBy);
+      const bValue = getSortValue(b, sortBy);
+      
+      return sortOrder === 'asc' 
+        ? compareValues(aValue, bValue)
+        : compareValues(bValue, aValue);
+    });
+  
+    setFilteredLectures(sortedLectures);
+  };
+  
+  const getSortValue = (lecture: Lecture, sortBy: keyof Lecture['metadata']) => {
+    if (sortBy === 'date') {
+      return new Date(lecture.metadata.date).getTime();
+    }
+    if (sortBy === 'course') {
+      return `${lecture.metadata.course.department} ${lecture.metadata.course.number}`;
+    }
+    return lecture.metadata[sortBy];
+  };
+  
+  const compareValues = (a: any, b: any): number => {
+    if (typeof a === 'string' && typeof b === 'string') {
+      return a.localeCompare(b);
+    }
+    return a - b;
   };
 
   const handleSort = (column: keyof Lecture['metadata']) => {
@@ -92,7 +106,10 @@ const LectureList: React.FC = () => {
     }
   };
 
-  const uniqueCourses = Array.from(new Set(lectures.map(lecture => lecture.metadata.course)));
+
+  const uniqueCourses = Array.from(
+    new Map(lectures.map(lecture => [lecture.metadata.course._id, lecture.metadata.course]))
+  ).map(([_, course]) => course);
   const uniqueFormats = Array.from(new Set(lectures.map(lecture => lecture.metadata.format)));
 
   return (
@@ -149,9 +166,19 @@ const LectureList: React.FC = () => {
                 <Button as={Link as any} to={`/lecture/${lecture._id}`} variant="outline-primary" size="sm" className="me-2">
                   View
                 </Button>
-                <Button onClick={() => handleDelete(lecture._id)} variant="outline-danger" size="sm">
+                <Button onClick={() => handleDelete(lecture._id)} variant="outline-danger" size="sm" className="me-2">
                   Delete
                 </Button>
+                <Button
+                  as={Link as any}
+                  to={`/lecture/edit/${lecture._id}`}
+                  variant="outline-primary"
+                  size="sm"
+                  className="me-2"
+                >
+                  Edit
+                </Button>
+                <PrintButton lecture={lecture} />
               </td>
             </tr>
           ))}
@@ -161,4 +188,5 @@ const LectureList: React.FC = () => {
   );
 };
 
+                  
 export default LectureList;

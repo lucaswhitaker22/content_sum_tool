@@ -5,8 +5,8 @@ import LectureList from './pages/Lecture/LectureList/LectureList';
 import LectureView from './pages/Lecture/LectureView/LectureView';
 import Login from './pages/User/LoginPage';
 import LectureAdd from './pages/Lecture/LectureAdd/LectureAdd';
-
-import CoursePage from './pages/Course/CoursePage';
+import LectureEdit from './pages/Lecture/LectureAdd/LectureEdit';
+import CourseAdd from './pages/Course/CourseAdd';
 import CourseList from './pages/Course/CourseList'
 import CourseEdit from './pages/Course/CourseEdit';
 
@@ -51,9 +51,9 @@ const App: React.FC = () => {
               <Nav className="me-auto">
                 <Nav.Link as={Link} to="/">Home</Nav.Link>
                 <Nav.Link as={Link} to="/lectures">Lectures</Nav.Link>
-                <Nav.Link as={Link} to="/lecture/new">Add Lecture</Nav.Link>
-                <Nav.Link as={Link} to="/about">About</Nav.Link>
-                <Nav.Link as={Link} to="/course/add">Courses</Nav.Link>
+                <Nav.Link as={Link} to="/lecture/add">Add Lecture</Nav.Link>
+                <Nav.Link as={Link} to="/course/list">Courses</Nav.Link>
+                <Nav.Link as={Link} to="/course/add">Add Course</Nav.Link>
 
               </Nav>
               <Nav>
@@ -75,8 +75,9 @@ const App: React.FC = () => {
         <Route path="/lectures" element={<LectureList />} />
         <Route path="/lecture/:id" element={<LectureView />} />
         <Route path="/lecture/add" element={<LectureAdd />} />
+        <Route path="/lecture/edit/:id" element={<LectureEdit />} />
         <Route path="/login" element={<Login/>} />
-        <Route path="/course/add" element={<CoursePage/>} />
+        <Route path="/course/add" element={<CourseAdd/>} />
         <Route path="/course/list" element={<CourseList/>} />
         <Route path="/course/edit/:id" element={<CourseEdit />} />
       </Routes>

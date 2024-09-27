@@ -31,13 +31,12 @@ const CourseList: React.FC = () => {
   
   const fetchCourses = async () => {
     try {
-      const response = await axios.get<Course[]>('http://localhost:3000/api/courses', { withCredentials: true });
+      const response = await axios.get<Course[]>('http://localhost:3000/api/courses');
       setCourses(response.data);
     } catch (error) {
-      setError('Failed to fetch courses. Please try again later.');
+      console.error('Error fetching courses:', error);
     }
   };
-
   const filterAndSortCourses = () => {
     let filtered = courses.filter(course =>
       (departmentFilter === '' || course.department.toLowerCase().includes(departmentFilter.toLowerCase())) &&
@@ -45,17 +44,20 @@ const CourseList: React.FC = () => {
       (yearFilter === '' || course.year.toString() === yearFilter)
     );
   
-    filtered.sort((a, b) => {
+    // Ensure uniqueness by using a Map with course._id as the key
+    const uniqueFilteredCourses = Array.from(
+      new Map(filtered.map(course => [course._id, course])).values()
+    );
+  
+    uniqueFilteredCourses.sort((a, b) => {
       const aValue = a[sortBy];
       const bValue = b[sortBy];
-      if (aValue != null && bValue != null) {
-        if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-        if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-      }
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
       return 0;
     });
   
-    setFilteredCourses(filtered);
+    setFilteredCourses(uniqueFilteredCourses);
   };
 
   const handleSort = (column: keyof Course) => {
@@ -64,13 +66,11 @@ const CourseList: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this course?')) {
-      try {
-        await axios.delete(`http://localhost:3000/api/courses/${id}`, { withCredentials: true });
-        fetchCourses();
-      } catch (error) {
-        setError('Failed to delete course. Please try again.');
-      }
+    try {
+      await axios.delete(`http://localhost:3000/api/courses/${id}`);
+      fetchCourses(); // Refresh the list after deletion
+    } catch (error) {
+      console.error('Error deleting course:', error);
     }
   };
 
@@ -104,7 +104,7 @@ const CourseList: React.FC = () => {
           />
         </Col>
         <Col md={3}>
-          <Button as={Link as any} to="/courses/add" variant="primary">Add New Course</Button>
+          <Button as={Link as any} to="/course/add" variant="primary">Add New Course</Button>
         </Col>
       </Row>
       <Table striped bordered hover>

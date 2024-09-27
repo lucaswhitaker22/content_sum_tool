@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import { Lecture } from './Lecture.interface';
+import { Lecture } from '../Lecture.interface';
 import {LectureNotes, LectureHeader, LecturePractice, LectureKeywords, LectureReview} from './LectureView.components';
+import  {PrintButton} from '../LecturePrint/PrintButton';
 
 axios.defaults.withCredentials = true;
 
@@ -67,7 +68,9 @@ const LectureView: React.FC = () => {
         </Col>
       </Row>
       <LecturePractice practice={lecture.practice} />
+      <PrintButton lecture={lecture} />
     </Container>
+
   );
 };
 

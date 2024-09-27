@@ -1,10 +1,16 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
-import { Container, Form, Button, Card, Row, Col, Alert } from 'react-bootstrap';
+import { Container, Form, Button, Card, Row, Col, Alert, Table, InputGroup } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Course } from './Course.interface'
-
-const CoursePage: React.FC = () => {
+interface CourseAddProps {
+  id?: string;
+  initialCourse?: any;
+  onSubmit?: (courseData: any) => Promise<void>;
+  title?: string;
+}
+const CourseAdd: React.FC<CourseAddProps> = ({
+}) => {
   const [course, setCourse] = useState<Course>({
     _id:'',
     department: '',
@@ -46,17 +52,20 @@ const CoursePage: React.FC = () => {
   };
 
   const handleGradingSchemeChange = (index: number, field: 'item' | 'weight', value: string) => {
-    const updatedScheme = [...(course.gradingScheme || [])];
-    updatedScheme[index] = { ...updatedScheme[index], [field]: field === 'weight' ? parseFloat(value) : value };
+    const updatedScheme = [...course.gradingScheme];
+    updatedScheme[index] = { 
+      ...updatedScheme[index], 
+      [field]: field === 'weight' ? parseFloat(value) : value 
+    };
     setCourse({ ...course, gradingScheme: updatedScheme });
   };
 
   const addGradingSchemeItem = () => {
-    setCourse({ ...course, gradingScheme: [...(course.gradingScheme || []), { item: '', weight: 0 }] });
+    setCourse({ ...course, gradingScheme: [...course.gradingScheme, { item: '', weight: 0 }] });
   };
 
   const removeGradingSchemeItem = (index: number) => {
-    const updatedScheme = [...(course.gradingScheme || [])];
+    const updatedScheme = [...course.gradingScheme];
     updatedScheme.splice(index, 1);
     setCourse({ ...course, gradingScheme: updatedScheme });
   };
@@ -67,19 +76,31 @@ const CoursePage: React.FC = () => {
     setSuccess(null);
 
     try {
+      const courseData: Partial<Course> = { ...course };
+      if (!id) {
+        delete courseData._id; // Remove _id for new courses
+      }
+
+      // Ensure gradingScheme is properly formatted
+      courseData.gradingScheme = courseData.gradingScheme?.map(item => ({
+        item: item.item,
+        weight: Number(item.weight)
+      }));
+
       if (id) {
-        await axios.put(`http://localhost:3000/api/courses/${id}`, course);
+        await axios.put(`http://localhost:3000/api/courses/${id}`, courseData);
         setSuccess('Course updated successfully!');
       } else {
-        await axios.post('http://localhost:3000/api/courses', course);
+        const response = await axios.post('http://localhost:3000/api/courses', courseData);
         setSuccess('Course created successfully!');
+        setCourse(response.data);
       }
-      setTimeout(() => navigate('/courses'), 2000);
+      setTimeout(() => navigate('/course/list'), 2000);
     } catch (error) {
       setError('Failed to save course. Please try again.');
+      console.error('Error saving course:', error);
     }
   };
-
   return (
     <Container className="py-4">
       <Card>
@@ -174,34 +195,56 @@ const CoursePage: React.FC = () => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Grading Scheme</Form.Label>
-              {course.gradingScheme?.map((item, index) => (
-                <Row key={index} className="mb-2">
-                  <Col>
-                    <Form.Control
-                      type="text"
-                      value={item.item}
-                      onChange={(e) => handleGradingSchemeChange(index, 'item', e.target.value)}
-                      placeholder="Item"
-                    />
-                  </Col>
-                  <Col>
-                    <Form.Control
-                      type="number"
-                      value={item.weight}
-                      onChange={(e) => handleGradingSchemeChange(index, 'weight', e.target.value)}
-                      placeholder="Weight (%)"
-                    />
-                  </Col>
-                  <Col xs="auto">
-                    <Button variant="danger" onClick={() => removeGradingSchemeItem(index)}>Remove</Button>
-                  </Col>
-                </Row>
-              ))}
-              <Button variant="secondary" onClick={addGradingSchemeItem} className="mt-2">
-                Add Grading Item
-              </Button>
-            </Form.Group>
+  <Form.Label>Grading Scheme</Form.Label>
+  <Card>
+    <Card.Body>
+      <Table responsive>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Weight (%)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {course.gradingScheme?.map((item, index) => (
+            <tr key={index}>
+              <td>
+                <Form.Control
+                  type="text"
+                  value={item.item}
+                  onChange={(e) => handleGradingSchemeChange(index, 'item', e.target.value)}
+                  placeholder="Item"
+                />
+              </td>
+              <td>
+                <InputGroup>
+                  <Form.Control
+                    type="number"
+                    value={item.weight}
+                    onChange={(e) => handleGradingSchemeChange(index, 'weight', e.target.value)}
+                    placeholder="Weight"
+                  />
+                  <InputGroup.Text>%</InputGroup.Text>
+                </InputGroup>
+              </td>
+              <td>
+                <Button variant="outline-danger" size="sm" onClick={() => removeGradingSchemeItem(index)}>
+                  <i className="bi bi-trash"></i> Remove
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+      <div className="d-flex justify-content-end mt-3">
+        <Button variant="outline-primary" onClick={addGradingSchemeItem}>
+          <i className="bi bi-plus"></i> Add Grading Item
+        </Button>
+      </div>
+    </Card.Body>
+  </Card>
+</Form.Group>
             <Button variant="primary" type="submit">
               {id ? 'Update Course' : 'Create Course'}
             </Button>
@@ -212,4 +255,4 @@ const CoursePage: React.FC = () => {
   );
 };
 
-export default CoursePage;
+export default CourseAdd;

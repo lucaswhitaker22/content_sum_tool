@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Container, Accordion, Button, Card, ListGroup, Row, Col, Badge, Table, Alert, Spinner } from 'react-bootstrap';
 import ReactMarkdown from 'react-markdown';
 import { Calendar3, Link, ChevronDown, Search, ChevronUp, Book, ListUl } from 'react-bootstrap-icons';
-import {Lecture} from './Lecture.interface'
+import {Lecture} from '../Lecture.interface'
 import './LectureNotes.css'; // Import your custom CSS file
 import remarkGfm from 'remark-gfm';
 

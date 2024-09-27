@@ -5,6 +5,7 @@
   "dependencies": {
     "axios": "*",
     "bootstrap": "^5.3.3",
+    "katex": "^0.16.11",
     "react": "*",
     "react-bootstrap": "^2.10.4",
     "react-bootstrap-icons": "^1.11.4",
@@ -20,7 +21,7 @@
     "web-vitals": "*"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set PORT=3002 && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -48,5 +49,6 @@
     "@types/react-dom": "*",
     "@types/react-syntax-highlighter": "^15.5.13",
     "typescript": "*"
-  }
+  },
+  "packageManager": "pnpm@9.11.0+sha512.0a203ffaed5a3f63242cd064c8fb5892366c103e328079318f78062f24ea8c9d50bc6a47aa3567cabefd824d170e78fa2745ed1f16b132e16436146b7688f19b"
 }

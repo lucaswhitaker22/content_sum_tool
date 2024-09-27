@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import { Container, Form, Button, Alert, Spinner, Card, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-axios.defaults.withCredentials = true;
 
 interface Course {
   _id: string;
@@ -12,73 +10,79 @@ interface Course {
   title: string;
 }
 
-const LectureAdd: React.FC = () => {
-  const [format, setFormat] = useState('Lecture');
-  const [date, setDate] = useState('');
-  const [courseId, setCourseId] = useState('');
-  const [title, setTitle] = useState('');
-  const [pdfUrl, setPdfUrl] = useState('');
+interface LectureMetadata {
+  format: string;
+  date: string;
+  course: string;
+  title: string;
+  path: string;
+}
+
+interface Lecture {
+  _id?: string;
+  metadata: LectureMetadata;
+}
+
+interface LectureAddProps {
+  initialLecture?: Lecture;
+  onSubmit?: (lectureData: Lecture) => Promise<void>;
+  isEditing?: boolean;
+}
+
+const LectureAdd: React.FC<LectureAddProps> = ({ initialLecture, onSubmit, isEditing = false }) => {
+  const navigate = useNavigate();
+  const [lecture, setLecture] = useState<Lecture>(initialLecture || {
+    metadata: {
+      format: 'Lecture',
+      date: new Date().toISOString().split('T')[0],
+      course: '',
+      title: '',
+      path: ''
+    }
+  });
+  const [courses, setCourses] = useState<Course[]>([]);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState<string>('');
-  const [generatedData, setGeneratedData] = useState<any>(null);
-  const [elapsedTime, setElapsedTime] = useState<number>(0);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [saveMessage, setSaveMessage] = useState<string>('');
-  const [courses, setCourses] = useState<Course[]>([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCourses();
   }, []);
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (status === 'loading') {
-      timer = setInterval(() => {
-        setElapsedTime((prevTime) => prevTime + 1);
-      }, 1000);
-    } else {
-      setElapsedTime(0);
-    }
-    return () => clearInterval(timer);
-  }, [status]);
-
   const fetchCourses = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/courses');
+      const response = await axios.get<Course[]>('http://localhost:3000/api/courses');
       setCourses(response.data);
     } catch (error) {
       console.error('Error fetching courses:', error);
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setLecture((prevLecture: Lecture) => ({
+      ...prevLecture,
+      metadata: {
+        ...prevLecture.metadata,
+        [name]: value
+      }
+    }));
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setStatus('loading');
     setMessage('');
-    setGeneratedData(null);
-    setSaveStatus('idle');
-    setSaveMessage('');
 
     try {
-      if (!pdfUrl) {
-        throw new Error('Please provide a PDF URL');
+      if (onSubmit) {
+        await onSubmit(lecture);
+      } else {
+        // Default behavior for adding a new lecture
+        await axios.post('http://localhost:3000/api/lectures', lecture);
       }
-
-      const requestBody = {
-        metadata: {
-          format,
-          date,
-          course: courseId,
-          title,
-          path: pdfUrl
-        }
-      };
-
-      const response = await axios.post('http://localhost:3000/api/generate-lecture', requestBody);
       setStatus('success');
-      setMessage('Lecture generated successfully!');
-      setGeneratedData(response.data);
+      setMessage(isEditing ? 'Lecture updated successfully!' : 'Lecture added successfully!');
+      setTimeout(() => navigate('/lectures'), 2000);
     } catch (error) {
       console.error('Error:', error);
       setStatus('error');
@@ -86,147 +90,90 @@ const LectureAdd: React.FC = () => {
     }
   };
 
-  const handleSave = async () => {
-    if (!generatedData) return;
-  
-    setSaveStatus('idle');
-    setSaveMessage('');
-  
-    try {
-      const lectureData = {
-        ...generatedData,
-        metadata: {
-          ...generatedData.metadata,
-          format: format,
-          date: new Date(date),
-          course: courseId,
-          title: title,
-          path: pdfUrl
-        }
-      };
-  
-      const response = await axios.post('http://localhost:3000/api/lectures', lectureData);
-      
-      setSaveStatus('success');
-      setSaveMessage('Lecture saved successfully!');
-      setTimeout(() => navigate('/lectures'), 2000);
-    } catch (error) {
-      console.error('Error saving lecture:', error);
-      setSaveStatus('error');
-      if (axios.isAxiosError(error) && error.response) {
-        setSaveMessage(error.response.data.message || 'An error occurred while saving the lecture');
-      } else {
-        setSaveMessage('An unexpected error occurred');
-      }
-    }
-  };
-
-  const renderStatusMessage = () => {
-    switch (status) {
-      case 'loading':
-        return (
-          <Alert variant="info">
-            <Spinner animation="border" size="sm" /> Generating lecture... (Elapsed time: {elapsedTime}s)
-          </Alert>
-        );
-      case 'success':
-        return <Alert variant="success">{message}</Alert>;
-      case 'error':
-        return <Alert variant="danger">{message}</Alert>;
-      default:
-        return null;
-    }
-  };
-
-  const renderSaveMessage = () => {
-    switch (saveStatus) {
-      case 'success':
-        return <Alert variant="success">{saveMessage}</Alert>;
-      case 'error':
-        return <Alert variant="danger">{saveMessage}</Alert>;
-      default:
-        return null;
-    }
-  };
-
   return (
-    <Container className="mt-4">
-      <h2 className="mb-4">Generate New Lecture</h2>
-      {renderStatusMessage()}
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3" controlId="formatInput">
-          <Form.Label>Format</Form.Label>
-          <Form.Control
-            type="text"
-            value={format}
-            onChange={(e) => setFormat(e.target.value)}
-            placeholder="Enter format (default: Lecture)"
-          />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="dateInput">
-          <Form.Label>Date</Form.Label>
-          <Form.Control
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="courseInput">
-          <Form.Label>Course</Form.Label>
-          <Form.Select
-            value={courseId}
-            onChange={(e) => setCourseId(e.target.value)}
-            required
-          >
-            <option value="">Select a course</option>
-            {courses.map((course) => (
-              <option key={course._id} value={course._id}>
-                {course.department} {course.number}: {course.title}
-              </option>
-            ))}
-          </Form.Select>
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="titleInput">
-          <Form.Label>Title</Form.Label>
-          <Form.Control
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter lecture title"
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="pdfUrlInput">
-          <Form.Label>PDF URL</Form.Label>
-          <Form.Control
-            type="url"
-            value={pdfUrl}
-            onChange={(e) => setPdfUrl(e.target.value)}
-            placeholder="Enter PDF URL"
-            required
-          />
-        </Form.Group>
-        <Button variant="primary" type="submit" disabled={status === 'loading'}>
-          {status === 'loading' ? (
-            <>
-              <Spinner animation="border" size="sm" /> Generating Lecture...
-            </>
-          ) : (
-            'Generate Lecture'
+    <Container className="py-4">
+      <Card>
+        <Card.Header as="h2">{isEditing ? 'Edit Lecture' : 'Add New Lecture'}</Card.Header>
+        <Card.Body>
+          {status === 'loading' && (
+            <Alert variant="info">
+              <Spinner animation="border" size="sm" /> {isEditing ? 'Updating' : 'Adding'} lecture...
+            </Alert>
           )}
-        </Button>
-      </Form>
-      {generatedData && (
-        <div className="mt-4">
-          <h3>Generated Lecture Data:</h3>
-          <pre>{JSON.stringify(generatedData, null, 2)}</pre>
-          {renderSaveMessage()}
-          <Button variant="success" onClick={handleSave} className="mt-3" disabled={saveStatus === 'success'}>
-            {saveStatus === 'success' ? 'Lecture Saved' : 'Save Lecture'}
-          </Button>
-        </div>
-      )}
+          {status === 'success' && <Alert variant="success">{message}</Alert>}
+          {status === 'error' && <Alert variant="danger">{message}</Alert>}
+          <Form onSubmit={handleSubmit}>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3" controlId="formatInput">
+                  <Form.Label>Format</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="format"
+                    value={lecture.metadata.format}
+                    onChange={handleInputChange}
+                    placeholder="Enter format (e.g., Lecture, Lab, Tutorial)"
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3" controlId="dateInput">
+                  <Form.Label>Date</Form.Label>
+                  <Form.Control
+                    type="date"
+                    name="date"
+                    value={lecture.metadata.date.split('T')[0]}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Form.Group className="mb-3" controlId="courseInput">
+              <Form.Label>Course</Form.Label>
+              <Form.Select
+                name="course"
+                value={lecture.metadata.course}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select a course</option>
+                {courses.map((course) => (
+                  <option key={course._id} value={course._id}>
+                    {course.department} {course.number}: {course.title}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="titleInput">
+              <Form.Label>Title</Form.Label>
+              <Form.Control
+                type="text"
+                name="title"
+                value={lecture.metadata.title}
+                onChange={handleInputChange}
+                placeholder="Enter lecture title"
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="pdfUrlInput">
+              <Form.Label>PDF URL</Form.Label>
+              <Form.Control
+                type="url"
+                name="path"
+                value={lecture.metadata.path}
+                onChange={handleInputChange}
+                placeholder="Enter PDF URL"
+                required
+              />
+            </Form.Group>
+            <Button variant="primary" type="submit" disabled={status === 'loading'}>
+              {isEditing ? 'Update Lecture' : 'Add Lecture'}
+            </Button>
+          </Form>
+        </Card.Body>
+      </Card>
     </Container>
   );
 };
