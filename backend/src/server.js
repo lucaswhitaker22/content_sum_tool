@@ -12,6 +12,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const session = require("express-session");
 const User = require('./models/user');
 const Course = require('./models/course');
+const crypto = require('crypto');
 
 app.use(express.json({ limit: '10mb' }));
 app.use(session({
@@ -69,20 +70,75 @@ try {
 }
 });
 
+
+
+// Set up the uploads directory
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+// Configure multer to store files in the uploads directory
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadsDir)
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
+  }
+});
+
+const upload = multer({ storage: storage });
+const fileStore = new Map();
+app.post('/api/upload-pdf', upload.single('pdf'), (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+
+  if (!req.file) {
+    return res.status(400).send('No file uploaded');
+  }
+
+  const fileId = crypto.randomBytes(16).toString('hex');
+  const fileInfo = {
+    path: req.file.path,
+    originalName: req.file.originalname,
+    expiry: Date.now() + 900000 // 1 hour from now
+  };
+
+  fileStore.set(fileId, fileInfo);
+
+  const fileUrl = `http://localhost:${PORT}/api/uploads/${req.file.filename}`;
+  res.json({ fileUrl, fileId });
+});
+
+app.use('/api/uploads', express.static(uploadsDir));
+
+// Cleanup function
+function cleanupExpiredFiles() {
+  const now = Date.now();
+  for (const [fileId, fileInfo] of fileStore.entries()) {
+    if (now > fileInfo.expiry) {
+      fs.unlink(fileInfo.path, (err) => {
+        if (err) {
+          console.error(`Error deleting file ${fileId}: ${err}`);
+        } else {
+          console.log(`Successfully deleted expired file ${fileId}`);
+          fileStore.delete(fileId);
+        }
+      });
+    }
+  }
+  console.log(`Cleanup completed. Remaining files: ${fileStore.size}`);
+}
+
 // Import the Lecture model
 const Lecture = require("./models/lecture");
 // Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Specify the directory to store uploaded files
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Use current timestamp as filename
-  }
-});
-const upload = multer({ storage });
+const db_name = "test"
 mongoose
-  .connect("mongodb+srv://maclucas:dN6b25Lndp9Vwlyc@cluster0.crdb5.mongodb.net/personal?retryWrites=true&w=majority&appName=Cluster0",
+  .connect("mongodb+srv://maclucas:dN6b25Lndp9Vwlyc@cluster0.crdb5.mongodb.net/"+db_name+"?retryWrites=true&w=majority&appName=Cluster0",
     {
       useNewUrlParser: true
     }
@@ -173,6 +229,9 @@ app.post("/api/generate-lecture", async (req, res) => {
     return res.status(400).json({ message: "Invalid input data" });
   }
 
+  // The content.metadata.path should now be the full URL to the PDF file
+  const pdfUrl = content.metadata.path;
+
   const contentJson = JSON.stringify(content);
   const escapedContentJson = contentJson.replace(/"/g, '\\"');
   const command = `python "${pythonScriptPath}" "${escapedContentJson}"`;
@@ -198,6 +257,10 @@ app.post("/api/generate-lecture", async (req, res) => {
     try {
       const lectureData = JSON.parse(stdout);
       lectureData.userId = req.user._id;
+      
+      // The PDF URL is already in the correct format, so we don't need to modify it
+      lectureData.metadata.path = pdfUrl;
+      
       res.status(200).json(lectureData);
     } catch (err) {
       console.error("Error processing lecture data:", err);
@@ -209,7 +272,6 @@ app.post("/api/generate-lecture", async (req, res) => {
     }
   });
 });
-
 // Get all lectures for the authenticated user
 app.get("/api/lectures", async (req, res) => {
   if (!req.user) {
@@ -384,5 +446,7 @@ app.delete("/api/courses/:id", async (req, res) => {
 
 
 app.listen(PORT, () => {
+  // Run cleanup every 15 minutes
+  setInterval(cleanupExpiredFiles, 900000);
   console.log(`Server is running on port ${PORT}`);
 });

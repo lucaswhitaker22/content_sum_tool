@@ -43,14 +43,29 @@ const LectureAdd: React.FC<LectureAddProps> = ({ initialLecture, onSubmit, isEdi
   const [courses, setCourses] = useState<Course[]>([]);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState<string>('');
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [generatedData, setGeneratedData] = useState<any>(null);
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
 
   useEffect(() => {
     fetchCourses();
   }, []);
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (status === 'loading') {
+      timer = setInterval(() => {
+        setElapsedTime((prevTime) => prevTime + 1);
+      }, 1000);
+    } else {
+      setElapsedTime(0);
+    }
+    return () => clearInterval(timer);
+  }, [status]);
+
   const fetchCourses = async () => {
     try {
-      const response = await axios.get<Course[]>('http://localhost:3000/api/courses');
+      const response = await axios.get<Course[]>('http://localhost:3000/api/courses', { withCredentials: true });
       setCourses(response.data);
     } catch (error) {
       console.error('Error fetching courses:', error);
@@ -68,23 +83,110 @@ const LectureAdd: React.FC<LectureAddProps> = ({ initialLecture, onSubmit, isEdi
     }));
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setPdfFile(event.target.files[0]);
+    }
+  };
+
+  const uploadPdf = async () => {
+    if (!pdfFile) {
+      throw new Error('No PDF file selected');
+    }
+  
+    const formData = new FormData();
+    formData.append('pdf', pdfFile);
+  
+    try {
+      const response = await axios.post('http://localhost:3000/api/upload-pdf', formData, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data.fileUrl; // This is now the direct URL to the PDF
+    } catch (error) {
+      console.error('Error uploading PDF:', error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setStatus('loading');
     setMessage('');
+    setGeneratedData(null);
+  
+    try {
+      let pdfUrl = lecture.metadata.path;
+      if (pdfFile) {
+        pdfUrl = await uploadPdf();
+        // Update the lecture state with the new PDF URL
+        setLecture(prevLecture => ({
+          ...prevLecture,
+          metadata: {
+            ...prevLecture.metadata,
+            path: pdfUrl
+          }
+        }));
+      }
+  
+      if (!pdfUrl) {
+        throw new Error('PDF file or URL is required');
+      }
+  
+      const requestBody = {
+        metadata: {
+          ...lecture.metadata,
+          path: pdfUrl
+        }
+      };
+  
+      console.log('Sending request body:', requestBody);
+  
+      const response = await axios.post('http://localhost:3000/api/generate-lecture', requestBody, {
+        withCredentials: true,
+      });
+  
+      setStatus('success');
+      setMessage('Lecture generated successfully!');
+      setGeneratedData(response.data);
+    } catch (error) {
+      console.error('Error:', error);
+      setStatus('error');
+      if (axios.isAxiosError(error) && error.response) {
+        setMessage(`Error: ${error.response.status} - ${error.response.data.message || error.message}`);
+      } else {
+        setMessage(error instanceof Error ? error.message : 'An unknown error occurred');
+      }
+    }
+  };
+
+  const handleSave = async () => {
+    if (!generatedData) return;
 
     try {
+      const lectureData = {
+        ...generatedData,
+        metadata: {
+          ...generatedData.metadata,
+          format: lecture.metadata.format,
+          date: lecture.metadata.date,
+          course: lecture.metadata.course,
+          title: lecture.metadata.title,
+        }
+      };
+
       if (onSubmit) {
-        await onSubmit(lecture);
+        await onSubmit(lectureData);
       } else {
-        // Default behavior for adding a new lecture
-        await axios.post('http://localhost:3000/api/lectures', lecture);
+        await axios.post('http://localhost:3000/api/lectures', lectureData, { withCredentials: true });
       }
       setStatus('success');
       setMessage(isEditing ? 'Lecture updated successfully!' : 'Lecture added successfully!');
       setTimeout(() => navigate('/lectures'), 2000);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error saving lecture:', error);
       setStatus('error');
       setMessage(error instanceof Error ? error.message : 'An unknown error occurred');
     }
@@ -97,7 +199,7 @@ const LectureAdd: React.FC<LectureAddProps> = ({ initialLecture, onSubmit, isEdi
         <Card.Body>
           {status === 'loading' && (
             <Alert variant="info">
-              <Spinner animation="border" size="sm" /> {isEditing ? 'Updating' : 'Adding'} lecture...
+              <Spinner animation="border" size="sm" /> Generating lecture... (Elapsed time: {elapsedTime}s)
             </Alert>
           )}
           {status === 'success' && <Alert variant="success">{message}</Alert>}
@@ -157,21 +259,39 @@ const LectureAdd: React.FC<LectureAddProps> = ({ initialLecture, onSubmit, isEdi
                 required
               />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="pdfUrlInput">
-              <Form.Label>PDF URL</Form.Label>
+            <Form.Group className="mb-3" controlId="pdfFileInput">
+              <Form.Label>PDF File</Form.Label>
               <Form.Control
-                type="url"
-                name="path"
-                value={lecture.metadata.path}
-                onChange={handleInputChange}
-                placeholder="Enter PDF URL"
-                required
+                type="file"
+                onChange={handleFileChange}
+                accept=".pdf"
               />
             </Form.Group>
+            {!pdfFile && (
+              <Form.Group className="mb-3" controlId="pdfUrlInput">
+                <Form.Label>PDF URL (if not uploading a file)</Form.Label>
+                <Form.Control
+                  type="url"
+                  name="path"
+                  value={lecture.metadata.path}
+                  onChange={handleInputChange}
+                  placeholder="Enter PDF URL"
+                />
+              </Form.Group>
+            )}
             <Button variant="primary" type="submit" disabled={status === 'loading'}>
-              {isEditing ? 'Update Lecture' : 'Add Lecture'}
+              Generate Lecture
             </Button>
           </Form>
+          {generatedData && (
+            <div className="mt-4">
+              <h3>Generated Lecture Data:</h3>
+              <pre>{JSON.stringify(generatedData, null, 2)}</pre>
+              <Button variant="success" onClick={handleSave} className="mt-3">
+                {isEditing ? 'Update Lecture' : 'Save Lecture'}
+              </Button>
+            </div>
+          )}
         </Card.Body>
       </Card>
     </Container>
