@@ -1,66 +1,137 @@
+// LectureEdit.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
-import LectureAdd from './LectureAdd';
+
+interface LectureMetadata {
+  title: string;
+  course: string;
+  path: string;
+}
+
+interface Lecture {
+  _id: string;
+  metadata: LectureMetadata;
+  userId: string;
+}
 
 const LectureEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [lecture, setLecture] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  
+  const [lecture, setLecture] = useState<Lecture | null>(null);
+  const [metadata, setMetadata] = useState<LectureMetadata>({ title: '', course: '', path: '' });
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
 
   useEffect(() => {
+    // Fetch the lecture data
     const fetchLecture = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/lectures/${id}`);
+        const response = await axios.get(`/api/lectures/${id}`, { withCredentials: true });
         setLecture(response.data);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching lecture:', err);
-        setError('Failed to fetch lecture data. Please try again.');
+        setMetadata(response.data.metadata);
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Error fetching lecture data');
+      } finally {
         setLoading(false);
       }
     };
 
+    // Fetch the list of courses for the user
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get('/api/courses', { withCredentials: true });
+        setCourses(response.data);
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Error fetching courses');
+      }
+    };
+
     fetchLecture();
+    fetchCourses();
   }, [id]);
 
-  const handleSubmit = async (lectureData: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setMetadata({
+      ...metadata,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
     try {
-      await axios.put(`http://localhost:3000/api/lectures/${id}`, lectureData);
-      navigate('/lectures');
-    } catch (err) {
-      console.error('Error updating lecture:', err);
-      setError('Failed to update lecture. Please try again.');
+      const response = await axios.put(`/api/lectures/${id}`, { metadata }, { withCredentials: true });
+      setSuccess('Lecture updated successfully!');
+      // Optionally, redirect the user after a delay
+      setTimeout(() => {
+        navigate(`/lectures/${id}`);
+      }, 2000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error updating lecture');
     }
   };
 
-  if (loading) {
-    return (
-      <Container className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-      </Container>
-    );
-  }
-
-  if (error) {
-    return (
-      <Container className="mt-4">
-        <Alert variant="danger">{error}</Alert>
-      </Container>
-    );
-  }
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p style={{ color: 'red' }}>{error}</p>;
+  if (!lecture) return <p>No lecture found.</p>;
 
   return (
-    <LectureAdd
-      initialLecture={lecture}
-      onSubmit={handleSubmit}
-      isEditing={true}
-    />
+    <div>
+      <h2>Edit Lecture</h2>
+      {success && <p style={{ color: 'green' }}>{success}</p>}
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="title">Title:</label>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            value={metadata.title} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        
+        <div>
+          <label htmlFor="course">Course:</label>
+          <select 
+            id="course" 
+            name="course" 
+            value={metadata.course} 
+            onChange={handleChange} 
+            required
+          >
+            <option value="">Select a course</option>
+            {courses.map(course => (
+              <option key={course._id} value={course._id}>
+                {course.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="path">PDF Path:</label>
+          <input 
+            type="text" 
+            id="path" 
+            name="path" 
+            value={metadata.path} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+
+        <button type="submit">Update Lecture</button>
+      </form>
+    </div>
   );
 };
 

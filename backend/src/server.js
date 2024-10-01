@@ -104,7 +104,8 @@ app.post('/api/upload-pdf', upload.single('pdf'), (req, res) => {
   const fileInfo = {
     path: req.file.path,
     originalName: req.file.originalname,
-    expiry: Date.now() + 900000 // 1 hour from now
+    //expiry: Date.now() + 900000 // 1 hour from now
+    expiry: null
   };
 
   fileStore.set(fileId, fileInfo);
