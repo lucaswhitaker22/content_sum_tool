@@ -2,7 +2,9 @@ import React, { useState, useEffect, ChangeEvent } from 'react';
 import { Container, Form, Button, Card, Row, Col, Alert, Table, InputGroup } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Course } from './Course.interface'
+import { Course, ScheduleItem } from './Course.interface'
+import TimePicker from 'react-time-picker';
+import Select from 'react-select';
 interface CourseAddProps {
   id?: string;
   initialCourse?: any;
@@ -12,7 +14,7 @@ interface CourseAddProps {
 const CourseAdd: React.FC<CourseAddProps> = ({
 }) => {
   const [course, setCourse] = useState<Course>({
-    _id:'',
+    _id: '',
     department: '',
     number: '',
     professor: '',
@@ -21,6 +23,7 @@ const CourseAdd: React.FC<CourseAddProps> = ({
     title: '',
     gradingScheme: [],
     outlineUrl: '',
+    schedule: []
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -28,11 +31,52 @@ const CourseAdd: React.FC<CourseAddProps> = ({
   const { id } = useParams<{ id: string }>();
   const terms = ['Spring', 'Summer', 'Fall', 'Winter'];
 
+  const handleScheduleChange = (index: number, field: keyof ScheduleItem, value: any) => {
+    const updatedSchedule = [...course.schedule];
+    if (field === 'dayOfWeek') {
+      updatedSchedule[index][field] = value; // Now value is just a string
+    } else {
+      updatedSchedule[index][field] = value;
+    }
+    setCourse({ ...course, schedule: updatedSchedule });
+  };
+  
+  const addScheduleItem = () => {
+    setCourse({
+      ...course,
+      schedule: [...course.schedule, { dayOfWeek: '', startTime: '', endTime: '', location: '', type: '' }],
+    });
+  };
+  
+  const removeScheduleItem = (index: number) => {
+    const updatedSchedule = [...course.schedule];
+    updatedSchedule.splice(index, 1);
+    setCourse({ ...course, schedule: updatedSchedule });
+  };
+
   useEffect(() => {
     if (id) {
       fetchCourse();
     }
   }, [id]);
+
+
+  interface DayOption {
+    value: string;
+    label: string;
+  }
+  
+  const daysOfWeek: DayOption[] = [
+    { value: 'Monday', label: 'Monday' },
+    { value: 'Tuesday', label: 'Tuesday' },
+    { value: 'Wednesday', label: 'Wednesday' },
+    { value: 'Thursday', label: 'Thursday' },
+    { value: 'Friday', label: 'Friday' },
+    { value: 'Saturday', label: 'Saturday' },
+    { value: 'Sunday', label: 'Sunday' },
+  ];
+  
+ 
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -50,6 +94,7 @@ const CourseAdd: React.FC<CourseAddProps> = ({
       setError('Failed to fetch course data');
     }
   };
+
 
   const handleGradingSchemeChange = (index: number, field: 'item' | 'weight', value: string) => {
     const updatedScheme = [...course.gradingScheme];
@@ -196,54 +241,126 @@ const CourseAdd: React.FC<CourseAddProps> = ({
             </Form.Group>
             <Form.Group className="mb-3">
   <Form.Label>Grading Scheme</Form.Label>
-  <Card>
-    <Card.Body>
-      <Table responsive>
-        <thead>
-          <tr>
-            <th>Item</th>
-            <th>Weight (%)</th>
-            <th>Action</th>
+{/* Grading Scheme Section */}
+<Card className="mt-4 mb-4">
+  <Card.Header>Grading Scheme</Card.Header>
+  <Card.Body>
+    <Table striped bordered hover>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Weight (%)</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {course.gradingScheme?.map((item, index) => (
+          <tr key={index}>
+            <td>
+              <Form.Control
+                type="text"
+                value={item.item}
+                onChange={(e) => handleGradingSchemeChange(index, 'item', e.target.value)}
+                placeholder="Item"
+              />
+            </td>
+            <td>
+              <Form.Control
+                type="number"
+                value={item.weight}
+                onChange={(e) => handleGradingSchemeChange(index, 'weight', e.target.value)}
+                placeholder="Weight"
+              />
+            </td>
+            <td>
+              <Button variant="danger" onClick={() => removeGradingSchemeItem(index)}>
+                Remove
+              </Button>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {course.gradingScheme?.map((item, index) => (
-            <tr key={index}>
-              <td>
-                <Form.Control
-                  type="text"
-                  value={item.item}
-                  onChange={(e) => handleGradingSchemeChange(index, 'item', e.target.value)}
-                  placeholder="Item"
-                />
-              </td>
-              <td>
-                <InputGroup>
-                  <Form.Control
-                    type="number"
-                    value={item.weight}
-                    onChange={(e) => handleGradingSchemeChange(index, 'weight', e.target.value)}
-                    placeholder="Weight"
-                  />
-                  <InputGroup.Text>%</InputGroup.Text>
-                </InputGroup>
-              </td>
-              <td>
-                <Button variant="outline-danger" size="sm" onClick={() => removeGradingSchemeItem(index)}>
-                  <i className="bi bi-trash"></i> Remove
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      <div className="d-flex justify-content-end mt-3">
-        <Button variant="outline-primary" onClick={addGradingSchemeItem}>
-          <i className="bi bi-plus"></i> Add Grading Item
-        </Button>
-      </div>
-    </Card.Body>
-  </Card>
+        ))}
+      </tbody>
+    </Table>
+    <Button variant="secondary" onClick={addGradingSchemeItem}>
+      Add Grading Item
+    </Button>
+  </Card.Body>
+</Card>
+  <Form.Label>Schedule</Form.Label>
+{/* Schedule Section */}
+<Card className="mt-4 mb-4">
+  <Card.Header>Schedule</Card.Header>
+  <Card.Body>
+    <Table striped bordered hover>
+      <thead>
+        <tr>
+          <th>Day of Week</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>Location</th>
+          <th>Type</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {course.schedule?.map((item, index) => (
+          <tr key={index}>
+  <td>
+  <Select
+    options={daysOfWeek}
+    value={daysOfWeek.find(day => day.value === item.dayOfWeek)}
+    onChange={(selectedOption) => handleScheduleChange(index, 'dayOfWeek', selectedOption ? selectedOption.value : '')}
+  />
+</td>
+            <td>
+              <Form.Control
+                type="text"
+                value={item.startTime}
+                onChange={(e) => handleScheduleChange(index, 'startTime', e.target.value)}
+                placeholder="HH:MM"
+              />
+            </td>
+            <td>
+              <Form.Control
+                type="text"
+                value={item.endTime}
+                onChange={(e) => handleScheduleChange(index, 'endTime', e.target.value)}
+                placeholder="HH:MM"
+              />
+            </td>
+            <td>
+              <Form.Control
+                type="text"
+                value={item.location}
+                onChange={(e) => handleScheduleChange(index, 'location', e.target.value)}
+                placeholder="Location"
+              />
+            </td>
+            <td>
+              <Form.Select
+                value={item.type}
+                onChange={(e) => handleScheduleChange(index, 'type', e.target.value)}
+              >
+                <option value="">Select Type</option>
+                <option value="Lecture">Lecture</option>
+                <option value="Lab">Lab</option>
+                <option value="Tutorial">Tutorial</option>
+              </Form.Select>
+            </td>
+            <td>
+              <Button variant="danger" onClick={() => removeScheduleItem(index)}>
+                Remove
+              </Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+    <Button variant="secondary" onClick={addScheduleItem}>
+      Add Schedule Item
+    </Button>
+  </Card.Body>
+</Card>
 </Form.Group>
             <Button variant="primary" type="submit">
               {id ? 'Update Course' : 'Create Course'}

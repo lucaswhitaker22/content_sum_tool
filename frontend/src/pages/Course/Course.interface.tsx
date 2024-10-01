@@ -2,6 +2,14 @@ export interface GradingSchemeItem {
     item: string;
     weight: number;
   }
+
+  export interface ScheduleItem {
+    dayOfWeek: string;
+    startTime: string;
+    endTime: string;
+    location: string;
+    type: string;
+  }
   
 export interface Course {
   _id: string;
@@ -13,4 +21,5 @@ export interface Course {
   title: string;
   gradingScheme: Array<{ item: string; weight: number }>;
   outlineUrl: string;
+  schedule: Array<ScheduleItem>;
 }

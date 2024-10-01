@@ -63,6 +63,12 @@ const LectureAdd: React.FC<LectureAddProps> = ({ initialLecture, onSubmit, isEdi
     return () => clearInterval(timer);
   }, [status]);
 
+  const setDateToNoon = (dateString: string): string => {
+    const date = new Date(dateString);
+    date.setHours(12, 0, 0, 0);
+    return date.toISOString();
+  };
+
   const fetchCourses = async () => {
     try {
       const response = await axios.get<Course[]>('http://localhost:3000/api/courses', { withCredentials: true });
@@ -121,7 +127,6 @@ const LectureAdd: React.FC<LectureAddProps> = ({ initialLecture, onSubmit, isEdi
       let pdfUrl = lecture.metadata.path;
       if (pdfFile) {
         pdfUrl = await uploadPdf();
-        // Update the lecture state with the new PDF URL
         setLecture(prevLecture => ({
           ...prevLecture,
           metadata: {
@@ -138,12 +143,12 @@ const LectureAdd: React.FC<LectureAddProps> = ({ initialLecture, onSubmit, isEdi
       const requestBody = {
         metadata: {
           ...lecture.metadata,
-          path: pdfUrl
+          path: pdfUrl,
+          date: setDateToNoon(lecture.metadata.date) // Set the date to noon
         }
       };
   
       console.log('Sending request body:', requestBody);
-  
       const response = await axios.post('http://localhost:3000/api/generate-lecture', requestBody, {
         withCredentials: true,
       });

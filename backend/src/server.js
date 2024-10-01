@@ -136,7 +136,7 @@ function cleanupExpiredFiles() {
 // Import the Lecture model
 const Lecture = require("./models/lecture");
 // Configure multer for file uploads
-const db_name = "test"
+const db_name = "fall2024"
 mongoose
   .connect("mongodb+srv://maclucas:dN6b25Lndp9Vwlyc@cluster0.crdb5.mongodb.net/"+db_name+"?retryWrites=true&w=majority&appName=Cluster0",
     {
@@ -348,12 +348,17 @@ app.post("/api/courses", async (req, res) => {
     const courseData = req.body;
     courseData.userId = req.user._id;
 
-    // Log the received course data
-    console.log("Received course data:", courseData);
+    // Validate schedule data
+    if (courseData.schedule && Array.isArray(courseData.schedule)) {
+      courseData.schedule = courseData.schedule.map(item => ({
+        ...item,
+        dayOfWeek: item.dayOfWeek.split(',').filter(day => day.trim() !== '').join(',')
+      }));
+    }
 
+    console.log("Received course data:", courseData);
     const newCourse = new Course(courseData);
     const savedCourse = await newCourse.save();
-    
     console.log("Saved course:", savedCourse);
     res.status(201).json(savedCourse);
   } catch (err) {
@@ -361,7 +366,6 @@ app.post("/api/courses", async (req, res) => {
     res.status(400).json({ message: err.message, stack: err.stack });
   }
 });
-
 // Update a course
 app.put("/api/courses/:id", async (req, res) => {
   if (!req.user) {
@@ -441,6 +445,77 @@ app.delete("/api/courses/:id", async (req, res) => {
     res.json({ message: "Course deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting course", error: error.message });
+  }
+});
+
+app.post("/api/courses/:id/schedule", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+
+  try {
+    const course = await Course.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!course) {
+      return res.status(404).json({ message: "Course not found or not owned by user" });
+    }
+
+    const scheduleItem = req.body;
+    // Validate that startTime and endTime are present
+    if (!scheduleItem.startTime || !scheduleItem.endTime) {
+      return res.status(400).json({ message: "Start time and end time are required" });
+    }
+    course.schedule.push(scheduleItem);
+    const updatedCourse = await course.save();
+    res.status(201).json(updatedCourse);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+app.put("/api/courses/:courseId/schedule/:scheduleId", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+
+  try {
+    const course = await Course.findOne({ _id: req.params.courseId, userId: req.user._id });
+    if (!course) {
+      return res.status(404).json({ message: "Course not found or not owned by user" });
+    }
+
+    const scheduleItem = course.schedule.id(req.params.scheduleId);
+    if (!scheduleItem) {
+      return res.status(404).json({ message: "Schedule item not found" });
+    }
+
+    // Validate that startTime and endTime are present in the request body
+    if (!req.body.startTime || !req.body.endTime) {
+      return res.status(400).json({ message: "Start time and end time are required" });
+    }
+
+    Object.assign(scheduleItem, req.body);
+    const updatedCourse = await course.save();
+    res.json(updatedCourse);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+app.delete("/api/courses/:courseId/schedule/:scheduleId", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "User not authenticated" });
+  }
+
+  try {
+    const course = await Course.findOne({ _id: req.params.courseId, userId: req.user._id });
+    if (!course) {
+      return res.status(404).json({ message: "Course not found or not owned by user" });
+    }
+
+    course.schedule.id(req.params.scheduleId).remove();
+    const updatedCourse = await course.save();
+    res.json(updatedCourse);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 });
 

@@ -12,7 +12,15 @@ const courseSchema = new mongoose.Schema({
     item: { type: String, required: true },
     weight: { type: Number, required: true }
   }],
-  outlineUrl: { type: String }
+  outlineUrl: { type: String },
+schedule: [{
+  dayOfWeek: { type: String, required: true, enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+  startTime: { type: String, required: true },
+  endTime: { type: String, required: true },
+  location: { type: String, required: true },
+  type: { type: String, required: true, enum: ['Lecture', 'Lab', 'Tutorial'] }
+}]
 });
 
 module.exports = mongoose.model('Course', courseSchema);
+

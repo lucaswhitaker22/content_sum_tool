@@ -162,40 +162,69 @@ const CourseList: React.FC = () => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p><strong>Professor:</strong> {selectedCourse?.professor}</p>
-          <p><strong>Term:</strong> {selectedCourse?.term} {selectedCourse?.year}</p>
-          
-          {selectedCourse?.outlineUrl && (
-            <p>
-              <strong>Course Outline:</strong>{' '}
-              <a href={selectedCourse.outlineUrl} target="_blank" rel="noopener noreferrer">
-                View Outline
-              </a>
-            </p>
-          )}
+  <p><strong>Professor:</strong> {selectedCourse?.professor}</p>
+  <p><strong>Term:</strong> {selectedCourse?.term} {selectedCourse?.year}</p>
+  
+  {selectedCourse?.outlineUrl && (
+    <p>
+      <strong>Course Outline:</strong>{' '}
+      <a href={selectedCourse.outlineUrl} target="_blank" rel="noopener noreferrer">
+        View Outline
+      </a>
+    </p>
+  )}
 
-          {selectedCourse?.gradingScheme && selectedCourse.gradingScheme.length > 0 && (
-            <>
-              <h5>Grading Scheme:</h5>
-              <Table striped bordered>
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Weight</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedCourse.gradingScheme.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.item}</td>
-                      <td>{item.weight}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </>
-          )}
-        </Modal.Body>
+  {selectedCourse?.gradingScheme && selectedCourse.gradingScheme.length > 0 && (
+    <>
+      <h5>Grading Scheme:</h5>
+      <Table striped bordered>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Weight</th>
+          </tr>
+        </thead>
+        <tbody>
+          {selectedCourse.gradingScheme.map((item, index) => (
+            <tr key={index}>
+              <td>{item.item}</td>
+              <td>{item.weight}%</td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </>
+  )}
+
+  {/* Add this section for the schedule */}
+  {selectedCourse?.schedule && selectedCourse.schedule.length > 0 && (
+  <>
+    <h5>Schedule:</h5>
+    <Table striped bordered>
+      <thead>
+        <tr>
+          <th>Day(s) of Week</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>Location</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        {selectedCourse.schedule.map((item, index) => (
+          <tr key={index}>
+            <td>{item.dayOfWeek}</td>
+            <td>{item.startTime}</td>
+            <td>{item.endTime}</td>
+            <td>{item.location}</td>
+            <td>{item.type}</td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  </>
+)}
+</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>
             Close
