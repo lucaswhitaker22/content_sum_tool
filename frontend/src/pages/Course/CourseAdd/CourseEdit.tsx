@@ -4,30 +4,32 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Alert, Spinner } from 'react-bootstrap';
 import CourseAdd from './CourseAdd';
 import axios from 'axios';
-
+import { Course } from '../Course.interface';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
-const getCourse = async (id: string) => {
+const getCourse = async (id: string): Promise<Course> => {
   const response = await axios.get(`${API_BASE_URL}/courses/${id}`, { withCredentials: true });
   return response.data;
 };
 
-const updateCourse = async (id: string, courseData: any) => {
+const updateCourse = async (id: string, courseData: Course): Promise<Course> => {
   const response = await axios.put(`${API_BASE_URL}/courses/${id}`, courseData, { withCredentials: true });
   return response.data;
 };
+
 const CourseEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [course, setCourse] = useState<any>(null);
+  const [course, setCourse] = useState<Course | null>(null);
 
   useEffect(() => {
     const fetchCourse = async () => {
+      if (!id) return;
       try {
-        const courseData = await getCourse(id!);
+        const courseData = await getCourse(id);
         setCourse(courseData);
         setLoading(false);
       } catch (err) {
@@ -39,9 +41,10 @@ const CourseEdit: React.FC = () => {
     fetchCourse();
   }, [id]);
 
-  const handleSubmit = async (courseData: any) => {
+  const handleSubmit = async (courseData: Course) => {
+    if (!id) return;
     try {
-      await updateCourse(id!, courseData);
+      await updateCourse(id, courseData);
       navigate('/course/list');
     } catch (err) {
       setError('Failed to update course. Please try again.');
@@ -56,6 +59,10 @@ const CourseEdit: React.FC = () => {
     return <Alert variant="danger">{error}</Alert>;
   }
 
+  if (!course) {
+    return <Alert variant="warning">No course data found.</Alert>;
+  }
+
   return (
     <CourseAdd
       id={id}
@@ -65,6 +72,5 @@ const CourseEdit: React.FC = () => {
     />
   );
 };
-
 
 export default CourseEdit;

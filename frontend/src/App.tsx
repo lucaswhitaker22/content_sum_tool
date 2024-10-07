@@ -6,9 +6,9 @@ import LectureView from './pages/Lecture/LectureView/LectureView';
 import Login from './pages/User/LoginPage';
 import LectureAdd from './pages/Lecture/LectureAdd/LectureAdd';
 import LectureEdit from './pages/Lecture/LectureAdd/LectureEdit';
-import CourseAdd from './pages/Course/CourseAdd';
-import CourseList from './pages/Course/CourseList'
-import CourseEdit from './pages/Course/CourseEdit';
+import CourseAdd from './pages/Course/CourseAdd/CourseAdd';
+import CourseList from './pages/Course/CourseList/CourseList'
+import CourseEdit from './pages/Course/CourseAdd/CourseEdit';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'katex/dist/katex.min.css';
