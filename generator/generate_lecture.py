@@ -5,7 +5,7 @@ from perplexity import PerplexityClient
 import json
 import logging
 import requests
-from assets.prompts import prompts
+from assets.prompts import generate_prompts
 
 # Configure logging
 logging.basicConfig(
@@ -13,10 +13,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
+prompts = []
 class Lecture:
     def __init__(self, client):
         self.client = client
+        self.prompts = generate_prompts()
 
     def generate_metadata(client, uploaded_file):
         logger.info("Generating metadata")

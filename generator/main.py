@@ -88,6 +88,7 @@ def generate_lecture(content):
         return json.dumps({"error": "Missing metadata"})
 
     metadata = content['metadata']
+    config = content['config']
     
     # Check for required fields
     required_fields = ['title', 'path', 'course', 'date']
@@ -423,6 +424,21 @@ def main():
     }
     generate_lecture(content)
 
+default_config = {
+    'metadata_overview_sentences': (4, 6),
+    'metadata_key_topics': (5, 7),
+    'metadata_topic_description_sentences': (1, 2),
+    'notes_word_count_range': (1000, 2000),
+    'review_question_count': (5, 7),
+    'review_answer_explanation_sentences': (1, 2),
+    'practice_multiple_choice_count': 5,
+    'practice_multiple_choice_options': 4,
+    'practice_short_answer_count': (2, 3),
+    'practice_long_answer_count': (1, 2),
+    'practice_answer_explanation_sentences': (1, 2),
+    'keywords_term_count': (10, 15),
+    'keywords_definition_sentences': (1, 2)
+}
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
