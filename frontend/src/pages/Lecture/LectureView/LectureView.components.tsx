@@ -7,10 +7,43 @@ import { Calendar3, Link, ChevronDown, Search, ChevronUp, Book, ListUl } from 'r
 import {Lecture} from '../Lecture.interface'
 import './LectureNotes.css'; // Import your custom CSS file
 import remarkGfm from 'remark-gfm';
-
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 const LectureNotes: React.FC<{ notes: string }> = ({ notes }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const customRenderers = {
+    table: ({ children, ...props }: React.HTMLProps<HTMLTableElement>) => (
+      <div className="table-responsive">
+        <table className="table table-bordered table-hover" {...props}>{children}</table>
+      </div>
+    ),
+    thead: ({ children, ...props }: React.HTMLProps<HTMLTableSectionElement>) => (
+      <thead className="table-light" {...props}>{children}</thead>
+    ),
+    tbody: ({ children, ...props }: React.HTMLProps<HTMLTableSectionElement>) => (
+      <tbody {...props}>{children}</tbody>
+    ),
+    tr: ({ children, ...props }: React.HTMLProps<HTMLTableRowElement>) => (
+      <tr {...props}>{children}</tr>
+    ),
+    td: ({ children, ...props }: React.HTMLProps<HTMLTableDataCellElement>) => (
+      <td {...props}>{children}</td>
+    ),
+    th: ({ children, ...props }: React.HTMLProps<HTMLTableHeaderCellElement>) => (
+      <th {...props}>{children}</th>
+    ),
+    inlineCode: ({ children }: { children: React.ReactNode }) => {
+      const isLatex = typeof children === 'string' && /^\$.*\$$/.test(children);
+      return isLatex ? (
+        <span className="latex-inline">{children}</span>
+      ) : (
+        <code>{children}</code>
+      );
+    },
+  };
 
   return (
     <Card className="mb-4 shadow-sm">
@@ -24,7 +57,9 @@ const LectureNotes: React.FC<{ notes: string }> = ({ notes }) => {
         <Card.Body>
           <ReactMarkdown 
             className="markdown-content" 
-            remarkPlugins={[remarkGfm]}
+            remarkPlugins={[remarkGfm, remarkMath]}
+            rehypePlugins={[rehypeKatex]}
+            components={customRenderers}
           >
             {notes}
           </ReactMarkdown>
