@@ -5,6 +5,7 @@ import { Course } from '../Course.interface';
 import FilterBar from './Components/FilterBar';
 import CourseTable from './Components/CourseTable';
 import CourseDetailsModal from './Components/CourseDetailsModal';
+const token = localStorage.getItem('authToken');
 
 const CourseList: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -28,7 +29,11 @@ const CourseList: React.FC = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await axios.get<Course[]>('http://localhost:3000/api/courses');
+      const response = await axios.get<Course[]>('http://localhost:3000/api/courses', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setCourses(response.data);
     } catch (error) {
       console.error('Error fetching courses:', error);
@@ -65,7 +70,11 @@ const CourseList: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:3000/api/courses/${id}`);
+      await axios.delete(`http://localhost:3000/api/courses/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       fetchCourses();
     } catch (error) {
       console.error('Error deleting course:', error);

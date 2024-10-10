@@ -5,16 +5,25 @@ import { Alert, Spinner } from 'react-bootstrap';
 import CourseAdd from './CourseAdd';
 import axios from 'axios';
 import { Course } from '../Course.interface';
+const token = localStorage.getItem('authToken');
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
 const getCourse = async (id: string): Promise<Course> => {
-  const response = await axios.get(`${API_BASE_URL}/courses/${id}`, { withCredentials: true });
+  const response = await axios.get(`${API_BASE_URL}/courses/${id}`,{
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
   return response.data;
 };
 
 const updateCourse = async (id: string, courseData: Course): Promise<Course> => {
-  const response = await axios.put(`${API_BASE_URL}/courses/${id}`, courseData, { withCredentials: true });
+  const response = await axios.put(`${API_BASE_URL}/courses/${id}`, courseData, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
   return response.data;
 };
 
