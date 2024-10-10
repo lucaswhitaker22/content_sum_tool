@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { Lecture } from '../Lecture.interface';
@@ -13,21 +13,36 @@ const LectureView: React.FC = () => {
   const [lecture, setLecture] = useState<Lecture | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const token = localStorage.getItem('authToken');
 
   useEffect(() => {
     const fetchLecture = async () => {
       try {
-        const response = await axios.get<Lecture>(`http://localhost:3000/api/lectures/${id}`);
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await axios.get<Lecture>(`http://localhost:3000/api/lectures/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         setLecture(response.data);
         setLoading(false);
       } catch (err) {
-        setError('Failed to fetch lecture data');
+        if (axios.isAxiosError(err) && err.response?.status === 401) {
+          setError('Authentication failed. Please log in again.');
+          navigate('/login'); // Redirect to login page
+        } else {
+          setError('Failed to fetch lecture data');
+        }
         setLoading(false);
       }
     };
 
     fetchLecture();
-  }, [id]);
+  }, [id, token, navigate]);
 
   if (loading) {
     return (

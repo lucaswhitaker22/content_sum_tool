@@ -5,6 +5,8 @@ import { Container, Form, Table, Button, Row, Col } from 'react-bootstrap';
 import { ChevronUp, ChevronDown } from 'react-bootstrap-icons';
 import { PrintButton } from '../LecturePrint/PrintButton';
 import { Lecture } from '../Lecture.interface';
+const token = localStorage.getItem('authToken');
+
 
 axios.defaults.withCredentials = true;
 
@@ -36,7 +38,9 @@ const LectureList: React.FC = () => {
 
   const fetchLectures = async () => {
     try {
-      const response = await axios.get<Lecture[]>('http://localhost:3000/api/lectures');
+      const response = await axios.get<Lecture[]>('http://localhost:3000/api/lectures', {headers: {
+        'Authorization': `Bearer ${token}`
+      }});
       setLectures(response.data);
       setFilteredLectures(response.data);
     } catch (error) {
@@ -98,7 +102,9 @@ const LectureList: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this lecture?')) {
       try {
-        await axios.delete(`http://localhost:3000/api/lectures/${id}`);
+        await axios.delete(`http://localhost:3000/api/lectures/${id}`,{headers: {
+          'Authorization': `Bearer ${token}`
+        }});
         fetchLectures(); // Refresh the list after deletion
       } catch (error) {
         console.error('Error deleting lecture:', error);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Alert, Spinner, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+const token = localStorage.getItem('authToken');
 
 interface Course {
   _id: string;
@@ -70,7 +71,9 @@ const LectureAdd: React.FC<LectureAddProps> = ({
 
   const fetchCourses = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/courses', { withCredentials: true });
+      const response = await axios.get('http://localhost:3000/api/courses', {headers: {
+        'Authorization': `Bearer ${token}`
+      }});
       setCourses(response.data);
     } catch (error) {
       console.error('Error fetching courses:', error);
@@ -99,9 +102,9 @@ const LectureAdd: React.FC<LectureAddProps> = ({
     formData.append('pdf', pdfFile);
 
     try {
-      const response = await axios.post('http://localhost:3000/api/upload-pdf', formData, {
+      const response = await axios.post('http://localhost:3000/api/upload/pdf', formData, {
         withCredentials: true,
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${token}` }
       });
       return response.data.fileUrl; // Direct URL to the PDF
     } catch (error) {
@@ -135,7 +138,9 @@ const LectureAdd: React.FC<LectureAddProps> = ({
 
       console.log('Sending request body:', requestBody);
 
-      const response = await axios.post('http://localhost:3000/api/generate-lecture', requestBody, { withCredentials: true });
+      const response = await axios.post('http://localhost:3000/api/lectures/generate/', requestBody, {headers: {
+        'Authorization': `Bearer ${token}`
+      }});
       
       setStatus('success');
       setMessage('Lecture generated successfully!');
@@ -165,7 +170,9 @@ const LectureAdd: React.FC<LectureAddProps> = ({
       if (onSubmit) {
         await onSubmit(lectureData);
       } else {
-        await axios.post('http://localhost:3000/api/lectures', lectureData, { withCredentials: true });
+        await axios.post('http://localhost:3000/api/lectures', lectureData, {headers: {
+          'Authorization': `Bearer ${token}`
+        }});
         
         setStatus('success');
         setMessage(isEditing ? 'Lecture updated successfully!' : 'Lecture added successfully!');

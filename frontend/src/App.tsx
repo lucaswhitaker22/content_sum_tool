@@ -9,6 +9,7 @@ import LectureEdit from './pages/Lecture/LectureAdd/LectureEdit';
 import CourseAdd from './pages/Course/CourseAdd/CourseAdd';
 import CourseList from './pages/Course/CourseList/CourseList'
 import CourseEdit from './pages/Course/CourseAdd/CourseEdit';
+import AuthSuccess from './pages/User/AuthSuccess';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'katex/dist/katex.min.css';
@@ -19,6 +20,21 @@ import axios from 'axios';
 axios.defaults.withCredentials = true;
 const App: React.FC = () => {
   const [user, setUser] = useState<any>(null);
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      axios.get('http://localhost:3000/api/user', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(response => {
+          setUser(response.data.user);
+        })
+        .catch(error => {
+          console.error('Error fetching user:', error);
+          localStorage.removeItem('authToken');
+        });
+    }
+  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -77,6 +93,7 @@ const App: React.FC = () => {
         <Route path="/lecture/add" element={<LectureAdd />} />
         <Route path="/lecture/edit/:id" element={<LectureEdit />} />
         <Route path="/login" element={<Login/>} />
+        <Route path="/auth-success" element={<AuthSuccess />} />
         <Route path="/course/add" element={<CourseAdd/>} />
         <Route path="/course/list" element={<CourseList/>} />
         <Route path="/course/edit/:id" element={<CourseEdit />} />

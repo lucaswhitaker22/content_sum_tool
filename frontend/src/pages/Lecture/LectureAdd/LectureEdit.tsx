@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+const token = localStorage.getItem('authToken');
 
 interface LectureMetadata {
   title: string;
@@ -30,7 +31,9 @@ const LectureEdit: React.FC = () => {
     // Fetch the lecture data
     const fetchLecture = async () => {
       try {
-        const response = await axios.get(`/api/lectures/${id}`, { withCredentials: true });
+        const response = await axios.get(`/api/lectures/${id}`, {headers: {
+          'Authorization': `Bearer ${token}`
+        }});
         setLecture(response.data);
         setMetadata(response.data.metadata);
       } catch (err: any) {
@@ -43,7 +46,9 @@ const LectureEdit: React.FC = () => {
     // Fetch the list of courses for the user
     const fetchCourses = async () => {
       try {
-        const response = await axios.get('/api/courses', { withCredentials: true });
+        const response = await axios.get('/api/courses', {headers: {
+          'Authorization': `Bearer ${token}`
+        }});
         setCourses(response.data);
       } catch (err: any) {
         setError(err.response?.data?.message || 'Error fetching courses');
@@ -67,7 +72,9 @@ const LectureEdit: React.FC = () => {
     setSuccess('');
 
     try {
-      const response = await axios.put(`/api/lectures/${id}`, { metadata }, { withCredentials: true });
+      const response = await axios.put(`/api/lectures/${id}`, { metadata }, {headers: {
+        'Authorization': `Bearer ${token}`
+      }});
       setSuccess('Lecture updated successfully!');
       // Optionally, redirect the user after a delay
       setTimeout(() => {
