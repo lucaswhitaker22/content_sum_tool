@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Alert, Spinner, Row, Col, Collapse, Card } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import ConfigurationForm, { ConfigType } from './ConfigurationForm';
+
 const token = localStorage.getItem('authToken');
 
 interface Course {
@@ -130,13 +132,29 @@ const LectureAdd: React.FC<LectureAddProps> = ({
     }
   };
 
-  const handleConfigChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setConfig(prevConfig => ({
-      ...prevConfig,
-      [name]: name.includes('count') && !name.includes('range') ? parseInt(value) : value.split(',').map(Number)
-    }));
-  };
+const handleConfigChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  field?: keyof ConfigType,
+  index?: number
+) => {
+  const { name, value } = e.target;
+  setConfig((prevConfig: ConfigType) => {
+    if (field && index !== undefined) {
+      const arrayField = prevConfig[field] as number[];
+      const newArray = [...arrayField];
+      newArray[index] = parseInt(value);
+      return {
+        ...prevConfig,
+        [field]: newArray,
+      };
+    } else {
+      return {
+        ...prevConfig,
+        [name]: parseInt(value),
+      };
+    }
+  });
+};
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -330,184 +348,9 @@ const LectureAdd: React.FC<LectureAddProps> = ({
       >
         {showConfig ? 'Hide Configuration' : 'Show Configuration'}
       </Button>
-
       <Collapse in={showConfig}>
         <div id="config-collapse">
-          <Card className="mt-3">
-            <Card.Body>
-              <h3>Configuration (Optional)</h3>
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Metadata Overview Sentences</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="metadata_overview_sentences"
-                      value={config.metadata_overview_sentences.join(',')}
-                      onChange={handleConfigChange}
-                      placeholder="e.g., 4,6"
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Metadata Key Topics</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="metadata_key_topics"
-                      value={config.metadata_key_topics.join(',')}
-                      onChange={handleConfigChange}
-                      placeholder="e.g., 5,7"
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Metadata Topic Description Sentences</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="metadata_topic_description_sentences"
-                      value={config.metadata_topic_description_sentences.join(',')}
-                      onChange={handleConfigChange}
-                      placeholder="e.g., 1,2"
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Notes Word Count Range</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="notes_word_count_range"
-                      value={config.notes_word_count_range.join(',')}
-                      onChange={handleConfigChange}
-                      placeholder="e.g., 1000,2000"
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Row>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Review Question Count</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="review_question_count"
-                      value={config.review_question_count.join(',')}
-                      onChange={handleConfigChange}
-                      placeholder="e.g., 5,7"
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Review Answer Explanation Sentences</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="review_answer_explanation_sentences"
-                      value={config.review_answer_explanation_sentences.join(',')}
-                      onChange={handleConfigChange}
-                      placeholder="e.g., 1,2"
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Practice Multiple Choice Count</Form.Label>
-                    <Form.Control
-                      type="number"
-                      name="practice_multiple_choice_count"
-                      value={config.practice_multiple_choice_count}
-                      onChange={handleConfigChange}
-                      placeholder="e.g., 5"
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Row>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Practice Multiple Choice Options</Form.Label>
-                    <Form.Control
-                      type="number"
-                      name="practice_multiple_choice_options"
-                      value={config.practice_multiple_choice_options}
-                      onChange={handleConfigChange}
-                      placeholder="e.g., 4"
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Practice Short Answer Count</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="practice_short_answer_count"
-                      value={config.practice_short_answer_count.join(',')}
-                      onChange={handleConfigChange}
-                      placeholder="e.g., 2,3"
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Practice Long Answer Count</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="practice_long_answer_count"
-                      value={config.practice_long_answer_count.join(',')}
-                      onChange={handleConfigChange}
-                      placeholder="e.g., 1,2"
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Row>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Practice Answer Explanation Sentences</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="practice_answer_explanation_sentences"
-                      value={config.practice_answer_explanation_sentences.join(',')}
-                      onChange={handleConfigChange}
-                      placeholder="e.g., 1,2"
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Keywords Term Count</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="keywords_term_count"
-                      value={config.keywords_term_count.join(',')}
-                      onChange={handleConfigChange}
-                      placeholder="e.g., 10,15"
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>Keywords Definition Sentences</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="keywords_definition_sentences"
-                      value={config.keywords_definition_sentences.join(',')}
-                      onChange={handleConfigChange}
-                      placeholder="e.g., 1,2"
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
+          <ConfigurationForm config={config} handleConfigChange={handleConfigChange} />
         </div>
       </Collapse>
     </div>
