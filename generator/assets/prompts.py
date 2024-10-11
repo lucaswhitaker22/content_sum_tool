@@ -57,8 +57,7 @@ Format as a JSON object with 'multiple', 'short', and 'long' keys, each containi
         """,
 
         "keywords": f"""
-Compile a glossary of key terms and concepts from the lecture:
-1. Identify at least {config['keywords_term_count'][0]} but no more than {config['keywords_term_count'][1]} important terms or keywords.
+1. Identify between {config['keywords_term_count'][0]} and {config['keywords_term_count'][1]} important terms or keywords.
 2. For each entry, provide:
    - The term itself
    - A clear, concise definition ({config['keywords_definition_sentences'][0]}-{config['keywords_definition_sentences'][1]} sentences)

@@ -181,8 +181,8 @@ class Lecture:
     def generate_keywords(client, uploaded_file, prompts):
         logger.info("Generating keywords")
         generation_config = {
-            "temperature": 0.3,
-            "top_p": 0.85,
+            "temperature": 0.2,
+            "top_p": 0.9,
             "top_k": 32,
             "max_output_tokens": 8192,
             "response_schema": content.Schema(

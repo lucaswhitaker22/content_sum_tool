@@ -134,9 +134,7 @@ const LectureAdd: React.FC<LectureAddProps> = ({
     const { name, value } = e.target;
     setConfig(prevConfig => ({
       ...prevConfig,
-      [name]: name.includes('count') && !name.includes('range') 
-        ? (value.includes(',') ? value.split(',').map(Number) : [Number(value)])
-        : (value.includes(',') ? value.split(',').map(Number) : value)
+      [name]: name.includes('count') && !name.includes('range') ? parseInt(value) : value.split(',').map(Number)
     }));
   };
 
