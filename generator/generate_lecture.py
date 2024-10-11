@@ -5,7 +5,6 @@ from perplexity import PerplexityClient
 import json
 import logging
 import requests
-from assets.prompts import generate_prompts
 
 # Configure logging
 logging.basicConfig(
@@ -13,13 +12,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-prompts = []
 class Lecture:
     def __init__(self, client):
         self.client = client
-        self.prompts = generate_prompts()
 
-    def generate_metadata(client, uploaded_file):
+    def generate_metadata(client, uploaded_file, prompts):
         logger.info("Generating metadata")
         generation_config = {
             "temperature": 0.3,
@@ -55,7 +52,7 @@ class Lecture:
             logger.error("Error: Unable to parse JSON response for metadata")
             return None
 
-    def generate_notes(file_txt):
+    def generate_notes(file_txt, prompts):
         logger.info("Generating notes")
 
         model = PerplexityClient()
@@ -70,7 +67,7 @@ class Lecture:
         logger.debug("Notes generated successfully")
         return notes
 
-    def generate_review(client, uploaded_file):
+    def generate_review(client, uploaded_file, prompts):
         logger.info("Generating review questions")
         generation_config = {
             "temperature": 0.3,
@@ -112,7 +109,7 @@ class Lecture:
             logger.error("Error: Unable to parse JSON response for review questions")
             return None
 
-    def generate_practice(client, uploaded_file):
+    def generate_practice(client, uploaded_file, prompts):
         logger.info("Generating practice exam")
         generation_config = {
             "temperature": 0.3,
@@ -181,7 +178,7 @@ class Lecture:
             logger.error("Error: Unable to parse JSON response for practice exam")
             return None
 
-    def generate_keywords(client, uploaded_file):
+    def generate_keywords(client, uploaded_file, prompts):
         logger.info("Generating keywords")
         generation_config = {
             "temperature": 0.3,

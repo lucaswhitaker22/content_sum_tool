@@ -16,6 +16,7 @@ import 'katex/dist/katex.min.css';
 
 import { Container, Nav, Navbar } from 'react-bootstrap';
 import axios from 'axios';
+const token = localStorage.getItem('authToken');
 
 axios.defaults.withCredentials = true;
 const App: React.FC = () => {
@@ -39,7 +40,9 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/user', { withCredentials: true });
+        const response = await axios.get('http://localhost:3000/api/user', {headers: {
+          'Authorization': `Bearer ${token}`
+        }});
         setUser(response.data.user);
       } catch (error) {
         console.error('Error fetching user:', error);
@@ -51,7 +54,9 @@ const App: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.get('http://localhost:3000/api/logout', { withCredentials: true });
+      await axios.get('http://localhost:3000/api/logout', { headers: {
+        'Authorization': `Bearer ${token}`
+      } });
       setUser(null);
     } catch (error) {
       console.error('Error logging out:', error);

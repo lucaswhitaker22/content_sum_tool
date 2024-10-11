@@ -10,6 +10,8 @@ from datetime import date, timedelta, datetime
 import tempfile
 from urllib.parse import urlparse
 import fitz  # PyMuPDF
+from assets.prompts import generate_prompts
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -73,27 +75,40 @@ content_args_list = [
 
 
 def generate_lecture(content):
+    logger.info("Starting generate_lecture function")
     api_key = "AIzaSyBI-cBe8ClKDTUrJuQ8x2i94OGen6XFbvs"
     client = GeminiClient(api_key)
+    
+    logger.debug(f"Received content: {content}")
     
     # Check if content is a string (JSON) and parse it
     if isinstance(content, str):
         try:
             content = json.loads(content)
+            logger.debug("Successfully parsed JSON content")
         except json.JSONDecodeError:
+            logger.error("Failed to parse JSON content")
             return json.dumps({"error": "Invalid JSON input"})
 
     # Ensure metadata exists
     if 'metadata' not in content:
+        logger.error("Missing metadata in content")
         return json.dumps({"error": "Missing metadata"})
 
     metadata = content['metadata']
     config = content['config']
+    logger.info(config)
+    
+    prompts = generate_prompts(config)
+
+    logger.debug(f"Metadata: {metadata}")
+    logger.debug(f"Config: {config}")
     
     # Check for required fields
     required_fields = ['title', 'path', 'course', 'date']
     for field in required_fields:
         if field not in metadata:
+            logger.error(f"Missing required field: {field}")
             return json.dumps({"error": f"Missing required field: {field}"})
 
     logger.info(f"Generating lecture for {metadata['title']}")
@@ -103,6 +118,7 @@ def generate_lecture(content):
     try:
         # Check if the path is a URL
         if urlparse(file_path).scheme in ['http', 'https']:
+            logger.info(f"Downloading PDF from URL: {file_path}")
             # Download the PDF file
             response = requests.get(file_path)
             if response.status_code == 200:
@@ -111,37 +127,52 @@ def generate_lecture(content):
                 temp_file.write(response.content)
                 temp_file.close()
                 file_path = temp_file.name
+                logger.info(f"PDF downloaded and saved to temporary file: {file_path}")
             else:
+                logger.error(f"Failed to download PDF from URL: {file_path}")
                 raise Exception(f"Failed to download PDF from URL: {file_path}")
         
         # Ensure the file exists
         if not os.path.exists(file_path):
+            logger.error(f"PDF file not found: {file_path}")
             raise FileNotFoundError(f"PDF file not found: {file_path}")
         
+        logger.info("Extracting text from PDF")
         file_content = extract_text_from_pdf(file_path)
+        logger.debug(f"Extracted text length: {len(file_content)} characters")
+
+        logger.info("Uploading file to client")
         uploaded_file = client.upload_file(file_path)
+        logger.info("Retrieving file from client")
         client.retrieve_file(uploaded_file)
 
+
         # Generate initial metadata
-        logger.debug("Generating metadata")
-        metadata = Lecture.generate_metadata(client, uploaded_file)
+        logger.info("Generating metadata")
+        metadata = Lecture.generate_metadata(client, uploaded_file, prompts)
+        logger.debug(f"Generated metadata: {metadata}")
 
         # Add content_args to the metadata without overwriting existing keys
         for key, value in content.items():
             if key not in metadata:
                 metadata[key] = value
+        logger.debug(f"Updated metadata: {metadata}")
 
-        logger.debug("Generating notes")
-        notes = Lecture.generate_notes(file_content)
+        logger.info("Generating notes")
+        notes = Lecture.generate_notes(file_content,prompts)
+        logger.debug(f"Generated notes length: {len(notes)} characters")
 
-        logger.debug("Generating review")
-        review = Lecture.generate_review(client, uploaded_file)
+        logger.info("Generating review")
+        review = Lecture.generate_review(client, uploaded_file,prompts)
+        logger.debug(f"Generated review: {review}")
 
-        logger.debug("Generating keywords")
-        keywords = Lecture.generate_keywords(client, uploaded_file)
+        logger.info("Generating keywords")
+        keywords = Lecture.generate_keywords(client, uploaded_file,prompts)
+        logger.debug(f"Generated keywords: {keywords}")
 
-        logger.debug("Generating practice")
-        practice = Lecture.generate_practice(client, uploaded_file)
+        logger.info("Generating practice")
+        practice = Lecture.generate_practice(client, uploaded_file,prompts)
+        logger.debug(f"Generated practice: {practice}")
 
         data = {
             "metadata": metadata,
@@ -150,16 +181,20 @@ def generate_lecture(content):
             "keywords": keywords,
             "practice": practice,
         }
+        logger.info("Successfully generated all lecture components")
         return json.dumps(data)
 
     except Exception as e:
-        logger.error(f"Error generating lecture: {str(e)}")
+        logger.exception(f"Error generating lecture: {str(e)}")
         raise
 
     finally:
         # Clean up the temporary file if it was created
         if temp_file and os.path.exists(temp_file.name):
+            logger.info(f"Cleaning up temporary file: {temp_file.name}")
             os.unlink(temp_file.name)
+
+    logger.info("Finished generate_lecture function")
              
 def gen_html(data):
     logger.info(f"Generating HTML for {data['metadata']['title']}")
