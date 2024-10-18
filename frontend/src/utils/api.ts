@@ -17,6 +17,8 @@ const api = axios.create({
 // Lecture-related API calls
 export const fetchLectures = () => api.get<Lecture[]>('/lectures');
 export const deleteLecture = (id: string) => api.delete(`/lectures/${id}`);
+export const generateLecture = (requestBody: any) => api.post('/lectures/generate/', requestBody);
+export const saveLecture = (lectureData: Lecture) => api.post('/lectures', lectureData);
 
 // Course-related API calls
 export const fetchCourse = (id: string) => api.get<Course>(`/courses/${id}`);
@@ -25,4 +27,16 @@ export const updateCourse = (id: string, courseData: Partial<Course>) => api.put
 export const deleteCourse = (id: string) => api.delete(`/courses/${id}`);
 export const fetchCourses = () => api.get<Course[]>('/courses');
 
+
+// PDF upload
+export const uploadPdfFile = (pdfFile: File) => {
+    const formData = new FormData();
+    formData.append('pdf', pdfFile);
+  
+    return api.post('/upload/pdf', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  };
+
+  
 export default api;

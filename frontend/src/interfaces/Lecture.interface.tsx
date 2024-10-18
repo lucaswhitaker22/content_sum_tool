@@ -1,20 +1,38 @@
 // Lecture.interface.tsx
-
+import {Course} from '../interfaces/Course.interface'
 export interface GradingSchemeItem {
     item: string;
     weight: number;
   }
   
-export interface Course {
-    _id: string;
-    department: string;
-    number: string;
-    professor: string;
-    term: string;
-    year: number;
+
+export interface GeneratedDataSectionProps {
+    generatedData: any;
+    handleSave: () => void;
+    isEditing: boolean;
+  }
+
+  export interface ConfigurationType {
+    metadata_overview_sentences: number[],
+    metadata_key_topics: number[],
+    metadata_topic_description_sentences: number[],
+    notes_word_count_range: number[],
+    review_question_count: number[],
+    review_answer_explanation_sentences: number[],
+    practice_multiple_choice_count: number,
+    practice_multiple_choice_options: number,
+    practice_short_answer_count: number[],
+    practice_long_answer_count: number[],
+    practice_answer_explanation_sentences: number[],
+    keywords_term_count: number[],
+    keywords_definition_sentences: number[]
+  }
+export interface LectureMetadata {
+    format: string;
+    date: string;
+    course: string;
     title: string;
-    gradingScheme?: GradingSchemeItem[];
-    outlineUrl?: string;
+    path: string;
   }
 
 export interface Lecture {

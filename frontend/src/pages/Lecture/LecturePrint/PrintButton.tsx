@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Lecture, Course } from '../../../interfaces/Lecture.interface';
+import { Lecture  } from '../../../interfaces/Lecture.interface';
+import { Course } from '../../../interfaces/Course.interface';
+
 import ReactMarkdown from 'react-markdown';
 import { renderToString } from 'react-dom/server';
 import { Button, Modal, Form } from 'react-bootstrap';
