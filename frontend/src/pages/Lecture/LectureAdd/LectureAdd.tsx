@@ -177,7 +177,7 @@ const handleSave = async () => {
             setStatus('success');
             setMessage(isEditing ? 'Lecture updated successfully!' : 'Lecture added successfully!');
 
-            setTimeout(() => navigate('/lectures'), 2000);
+            setTimeout(() => navigate('/lecture/list'), 2000);
         }
 
     } catch (error) {

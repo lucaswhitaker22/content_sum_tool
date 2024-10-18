@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 const HomePage: React.FC = () => {
   return (
     <Container className="mt-5">
-      <h1 className="text-center mb-5">Welcome to LectureGPT</h1>
+      <h1 className="text-center mb-5">Welcome to StudyAI</h1>
       <Row>
         <Col md={4}>
           <Card className="mb-4">
@@ -14,7 +14,7 @@ const HomePage: React.FC = () => {
               <Card.Text>
                 Create new lectures using our AI-powered generator.
               </Card.Text>
-              <Link to="/lectures/add" className="btn btn-primary">
+              <Link to="/lecture/add" className="btn btn-primary">
                 Generate Lecture
               </Link>
             </Card.Body>
@@ -27,7 +27,7 @@ const HomePage: React.FC = () => {
               <Card.Text>
                 Browse and manage your existing lectures.
               </Card.Text>
-              <Link to="/lectures" className="btn btn-primary">
+              <Link to="/lecture/list" className="btn btn-primary">
                 View Lectures
               </Link>
             </Card.Body>
@@ -36,12 +36,12 @@ const HomePage: React.FC = () => {
         <Col md={4}>
           <Card className="mb-4">
             <Card.Body>
-              <Card.Title>About LectureGPT</Card.Title>
+              <Card.Title>Manage Courses</Card.Title>
               <Card.Text>
-                Learn more about our AI-powered lecture generation tool.
+                View and manage your courses.
               </Card.Text>
-              <Link to="/about" className="btn btn-primary">
-                Learn More
+              <Link to="/course/list" className="btn btn-primary">
+                View Courses
               </Link>
             </Card.Body>
           </Card>

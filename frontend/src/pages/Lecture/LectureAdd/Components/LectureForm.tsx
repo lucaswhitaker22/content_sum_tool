@@ -114,7 +114,7 @@ const LectureForm: React.FC<LectureFormProps> = ({
       )}
 
       <div className="d-flex justify-content-end mt-4">
-        <Button variant="outline-secondary" className="me-2" onClick={() => navigate('/lectures')}>
+        <Button variant="outline-secondary" className="me-2" onClick={() => navigate('/lecture/list')}>
           Cancel
         </Button>
         <Button variant="primary" type="submit" disabled={status === 'loading'}>

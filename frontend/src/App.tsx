@@ -64,12 +64,12 @@ const App: React.FC = () => {
     <Router>
 <Navbar bg="light" expand="lg">
           <Container>
-            <Navbar.Brand as={Link} to="/">LectureGPT</Navbar.Brand>
+            <Navbar.Brand as={Link} to="/">StudyAI</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
               <Nav className="me-auto">
                 <Nav.Link as={Link} to="/">Home</Nav.Link>
-                <Nav.Link as={Link} to="/lectures">Lectures</Nav.Link>
+                <Nav.Link as={Link} to="/lecture/list">Lectures</Nav.Link>
                 <Nav.Link as={Link} to="/lecture/add">Add Lecture</Nav.Link>
                 <Nav.Link as={Link} to="/course/list">Courses</Nav.Link>
                 <Nav.Link as={Link} to="/course/add">Add Course</Nav.Link>
@@ -91,7 +91,7 @@ const App: React.FC = () => {
         </Navbar>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/lectures" element={<LectureList />} />
+        <Route path="/lecture/list" element={<LectureList />} />
         <Route path="/lecture/:id" element={<LectureView />} />
         <Route path="/lecture/add" element={<LectureAdd />} />
         <Route path="/login" element={<Login/>} />

@@ -87,6 +87,11 @@ const getPrintContent = (lecture: Lecture, selectedSections: SelectedSections) =
             border-bottom: 1px solid #ccc;
             margin-bottom: 10px;
           }
+          .long-answer-space {
+            height: 240px;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 10px;
+          }
           .answer {
             margin-top: 5px;
             padding: 5px;
@@ -193,7 +198,7 @@ const getPrintContent = (lecture: Lecture, selectedSections: SelectedSections) =
               <div class="question">
                 ${index + 1}. ${item.question}
               </div>
-              <div class="answer-space"></div>
+              <div class="long-answer-space"></div>
             `).join('')}
             <h3>Multiple Choice Questions</h3>
             ${lecture.practice.multiple.map((item, index) => `
