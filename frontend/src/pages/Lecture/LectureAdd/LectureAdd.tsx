@@ -53,12 +53,19 @@ const LectureAdd: React.FC<LectureAddProps> = ({ initialLecture, onSubmit, isEdi
   
   // Configuration state
   const [config, setConfig] = useState({
+    metadata_overview_sentences: [2, 3],
     metadata_key_topics: [5, 7],
+    metadata_topic_description_sentences: [1, 2],
     notes_word_count_range: [1000, 2000],
     review_question_count: [5, 7],
+    review_answer_explanation_sentences: [1, 2],
     practice_multiple_choice_count: 5,
+    practice_multiple_choice_options: 4,
     practice_short_answer_count: [2, 3],
-    practice_long_answer_count: [1, 2]
+    practice_long_answer_count: [1, 2],
+    practice_answer_explanation_sentences: [1, 2],
+    keywords_term_count: [5, 10],
+    keywords_definition_sentences: [1, 2]
   });
 useEffect(() => {
     loadCourses();
@@ -99,43 +106,52 @@ const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     }
 };
 
+
 const handleConfigChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setConfig(prevConfig => ({
-        ...prevConfig,
-        [name]: value.includes(',') ? value.split(',').map(Number) : Number(value)
-    }));
+  const { name, value } = e.target;
+  setConfig(prevConfig => {
+    const newValue = value.includes(',')
+      ? value.split(',').map(num => parseInt(num.trim(), 10)).filter(num => !isNaN(num))
+      : parseInt(value, 10);
+    
+    return {
+      ...prevConfig,
+      [name]: newValue
+    };
+  });
 };
 
+
 const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setStatus('loading');
-    setMessage('');
-    setGeneratedData(null);
+  event.preventDefault();
+  setStatus('loading');
+  setMessage('');
+  setGeneratedData(null);
 
-    try {
-        let pdfUrl = lecture.metadata.path;
+  try {
+    let pdfUrl = lecture.metadata.path;
 
-        if (pdfFile) {
-            const response = await uploadPdfFile(pdfFile);
-            pdfUrl = response.data.fileUrl;
-            setLecture((prevLecture) => ({
-                ...prevLecture,
-                metadata: { ...prevLecture.metadata, path: pdfUrl }
-            }));
-        }
+    if (pdfFile) {
+      const response = await uploadPdfFile(pdfFile);
+      pdfUrl = response.data.fileUrl;
+      setLecture((prevLecture) => ({
+        ...prevLecture,
+        metadata: { ...prevLecture.metadata, path: pdfUrl }
+      }));
+    }
 
-        if (!pdfUrl) throw new Error('PDF file or URL is required');
+    if (!pdfUrl) throw new Error('PDF file or URL is required');
 
-        const requestBody = { metadata: { ...lecture.metadata, path: pdfUrl }, config };
-        
-        const response = await generateLecture(requestBody);
+    // Use the full config object when generating the lecture
+    const requestBody = { metadata: { ...lecture.metadata, path: pdfUrl }, config };
+    
+    const response = await generateLecture(requestBody);
 
-        setStatus('success');
-        setMessage('Lecture generated successfully!');
-        setGeneratedData(response.data);
+    setStatus('success');
+    setMessage('Lecture generated successfully!');
+    setGeneratedData(response.data);
 
-    } catch (error) {
+  } catch (error) {
         console.error('Error:', error);
         setStatus('error');
 

@@ -4,13 +4,13 @@ config
     prompts = {
         "metadata": f"""
 Review the lecture outline or slides to identify the core content and provide:
-1. A concise overview of the lecture's main focus and objectives ({config['metadata_overview_sentences'][0]}-{config['metadata_overview_sentences'][1]} sentences).
-2. List {config['metadata_key_topics'][0]}-{config['metadata_key_topics'][1]} key topics in order of appearance, with brief descriptions ({config['metadata_topic_description_sentences'][0]}-{config['metadata_topic_description_sentences'][1]} sentences each).
+1. A concise overview of the lecture's main focus and objectives in ({config['metadata_overview_sentences'][0]}-{config['metadata_overview_sentences'][1]} sentences).
+2. List between {config['metadata_key_topics'][0]}-{config['metadata_key_topics'][1]} key topics in order of appearance, with brief descriptions ({config['metadata_topic_description_sentences'][0]}-{config['metadata_topic_description_sentences'][1]} sentences each).
 Use specific terminology from the field of study. Ensure the overview and topics accurately reflect the lecture's content and structure.
         """,
 
         "notes": f"""
-Generate comprehensive lecture notes from the PDF:
+Generate comprehensive lecture notes from the PDF. It must be between {config['notes_word_count_range'][0]}-{config['notes_word_count_range'][1]} words
 1. Use Markdown formatting with headers (#, ##, ###) lists, and emphasis (**bold**, *italic*).
 2. Structure content hierarchically, following the lecture's organization.
 3. Include:
@@ -22,7 +22,6 @@ Generate comprehensive lecture notes from the PDF:
    - Include tables when useful
    - Important points or takeaways (highlighted as **Key Takeaway:** )
 4. Create a scannable, easily readable summary suitable for student review.
-5. Aim for {config['notes_word_count_range'][0]}-{config['notes_word_count_range'][1]} words, balancing detail with conciseness.
 Output in Markdown format.
         """,
 

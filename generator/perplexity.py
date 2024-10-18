@@ -30,15 +30,13 @@ class PerplexityClient:
         url = "https://api.perplexity.ai/chat/completions"
         
         payload = {
-            "model": "llama-3.1-sonar-large-128k-chat",
+            "model": "llama-3.1-sonar-large-128k-online",
             "messages": messages,
-            "temperature": 0.2,
-            "top_p": 0.9,
-            "return_related_questions": False,
-            "top_k": 0,
-            "stream": False,
-            "presence_penalty": 0,
-            "frequency_penalty": 1
+            "temperature": 0.5,
+            "top_p": 0.7,
+            "presence_penalty":0.5,
+            "frequency_penalty":1.0,
+            "stream": False
         }
         headers = {
             "Authorization": "Bearer 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",

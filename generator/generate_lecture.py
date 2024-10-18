@@ -20,7 +20,7 @@ class Lecture:
         logger.info("Generating metadata")
         generation_config = {
             "temperature": 0.3,
-            "top_p": 0.85,
+            "top_p": 0.5,
             "top_k": 32,
             "max_output_tokens": 8192,
             "response_schema": content.Schema(
@@ -71,7 +71,7 @@ class Lecture:
         logger.info("Generating review questions")
         generation_config = {
             "temperature": 0.3,
-            "top_p": 0.85,
+            "top_p": 0.5,
             "top_k": 32,
             "max_output_tokens": 8192,
             "response_schema": content.Schema(
@@ -113,7 +113,7 @@ class Lecture:
         logger.info("Generating practice exam")
         generation_config = {
             "temperature": 0.3,
-            "top_p": 0.85,
+            "top_p": 0.5,
             "top_k": 32,
             "max_output_tokens": 8192,
             "response_schema": content.Schema(
@@ -182,7 +182,7 @@ class Lecture:
         logger.info("Generating keywords")
         generation_config = {
             "temperature": 0.2,
-            "top_p": 0.9,
+            "top_p": 0.5,
             "top_k": 32,
             "max_output_tokens": 8192,
             "response_schema": content.Schema(
