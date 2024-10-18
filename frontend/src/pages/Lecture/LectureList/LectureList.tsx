@@ -1,24 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
-import { Container, Form, Table, Button, Row, Col } from 'react-bootstrap';
-import { ChevronUp, ChevronDown } from 'react-bootstrap-icons';
-import { PrintButton } from '../LecturePrint/PrintButton';
-import { Lecture } from '../Lecture.interface';
-const token = localStorage.getItem('authToken');
-
-
-axios.defaults.withCredentials = true;
-
-export interface Course {
-  _id: string;
-  department: string;
-  number: string;
-  professor: string;
-  term: string;
-  year: number;
-  title: string;
-}
+import { Container } from 'react-bootstrap';
+import { fetchLectures } from '../../../utils/api';
+import { Lecture } from '../../../interfaces/Lecture.interface';
+import LectureFilters from './LectureFilters';
+import LectureTable from './LectureTable';
 
 const LectureList: React.FC = () => {
   const [lectures, setLectures] = useState<Lecture[]>([]);
@@ -29,18 +14,16 @@ const LectureList: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
-    fetchLectures();
+    fetchLecturesData();
   }, []);
 
   useEffect(() => {
     filterAndSortLectures();
   }, [courseFilter, formatFilter, sortBy, sortOrder, lectures]);
 
-  const fetchLectures = async () => {
+  const fetchLecturesData = async () => {
     try {
-      const response = await axios.get<Lecture[]>('http://localhost:3000/api/lectures', {headers: {
-        'Authorization': `Bearer ${token}`
-      }});
+      const response = await fetchLectures();
       setLectures(response.data);
       setFilteredLectures(response.data);
     } catch (error) {
@@ -99,100 +82,25 @@ const LectureList: React.FC = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this lecture?')) {
-      try {
-        await axios.delete(`http://localhost:3000/api/lectures/${id}`,{headers: {
-          'Authorization': `Bearer ${token}`
-        }});
-        fetchLectures(); // Refresh the list after deletion
-      } catch (error) {
-        console.error('Error deleting lecture:', error);
-      }
-    }
-  };
-
-
-  const uniqueCourses = Array.from(
-    new Map(lectures.map(lecture => [lecture.metadata.course._id, lecture.metadata.course]))
-  ).map(([_, course]) => course);
-  const uniqueFormats = Array.from(new Set(lectures.map(lecture => lecture.metadata.format)));
-
   return (
     <Container>
       <h1 className="mb-4">Lectures</h1>
-      <Row className="mb-3">
-        <Col md={6}>
-          <Form.Select
-            value={courseFilter}
-            onChange={(e) => setCourseFilter(e.target.value)}
-          >
-            <option value="">All Courses</option>
-            {uniqueCourses.map(course => (
-              <option key={course._id} value={course._id}>
-                {course.department} {course.number}: {course.title}
-              </option>
-            ))}
-          </Form.Select>
-        </Col>
-        <Col md={6}>
-          <Form.Select
-            value={formatFilter}
-            onChange={(e) => setFormatFilter(e.target.value)}
-          >
-            <option value="">All Formats</option>
-            {uniqueFormats.map(format => (
-              <option key={format} value={format}>{format}</option>
-            ))}
-          </Form.Select>
-        </Col>
-      </Row>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            {['title', 'course', 'date', 'format'].map((column) => (
-              <th key={column} onClick={() => handleSort(column as keyof Lecture['metadata'])}>
-                <div className="d-flex justify-content-between align-items-center">
-                  {column.charAt(0).toUpperCase() + column.slice(1)}
-                  {sortBy === column && (sortOrder === 'asc' ? <ChevronUp /> : <ChevronDown />)}
-                </div>
-              </th>
-            ))}
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredLectures.map((lecture) => (
-            <tr key={lecture._id}>
-              <td>{lecture.metadata.title}</td>
-              <td>{`${lecture.metadata.course.department} ${lecture.metadata.course.number}: ${lecture.metadata.course.title}`}</td>
-              <td>{new Date(lecture.metadata.date).toLocaleDateString()}</td>
-              <td>{lecture.metadata.format}</td>
-              <td>
-                <Button as={Link as any} to={`/lecture/${lecture._id}`} variant="outline-primary" size="sm" className="me-2">
-                  View
-                </Button>
-                <Button onClick={() => handleDelete(lecture._id)} variant="outline-danger" size="sm" className="me-2">
-                  Delete
-                </Button>
-                <Button
-                  as={Link as any}
-                  to={`/lecture/edit/${lecture._id}`}
-                  variant="outline-primary"
-                  size="sm"
-                  className="me-2"
-                >
-                  Edit
-                </Button>
-                <PrintButton lecture={lecture} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <LectureFilters
+        lectures={lectures}
+        courseFilter={courseFilter}
+        setCourseFilter={setCourseFilter}
+        formatFilter={formatFilter}
+        setFormatFilter={setFormatFilter}
+      />
+      <LectureTable
+        lectures={filteredLectures}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        handleSort={handleSort as any}
+        onDelete={fetchLecturesData}
+      />
     </Container>
   );
 };
 
-                  
 export default LectureList;

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Form, Button, Alert, Spinner, Row, Col } from 'react-bootstrap';
-import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Course } from '../Course.interface';
+import { Course } from '../../../interfaces/Course.interface';
+import { fetchCourse, createCourse, updateCourse } from '../../../utils/api';
 import CourseBasicInfo from './Components/CourseBasicInfo';
 import GradingScheme from './Components/GradingScheme';
 import ScheduleComponent from './Components/ScheduleComponent';
@@ -39,14 +39,17 @@ const CourseAdd: React.FC<CourseAddProps> = ({
 
   useEffect(() => {
     if (id) {
-      fetchCourse();
+      fetchCourseData();
     }
   }, [id]);
 
-  const fetchCourse = async () => {
+  const fetchCourseData = async () => {
     try {
+      if (!id) {
+        throw new Error('Course ID is undefined');
+      }
       setStatus('loading');
-      const response = await axios.get(`http://localhost:3000/api/courses/${id}`);
+      const response = await fetchCourse(id);
       setCourse(response.data);
       setStatus('success');
     } catch (error) {
@@ -69,10 +72,10 @@ const CourseAdd: React.FC<CourseAddProps> = ({
       }));
       
       if (id) {
-        await axios.put(`http://localhost:3000/api/courses/${id}`, courseData);
+        await updateCourse(id, courseData);
         setMessage('Course updated successfully!');
       } else {
-        const response = await axios.post('http://localhost:3000/api/courses', courseData);
+        const response = await createCourse(courseData);
         setMessage('Course created successfully!');
         setCourse(response.data);
       }

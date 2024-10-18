@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, Button, Form } from 'react-bootstrap';
 import Select from 'react-select';
-import { ScheduleItem } from '../../Course.interface';
+import { ScheduleItem } from '../../../../interfaces/Course.interface';
 
 interface ScheduleComponentProps {
   schedule: ScheduleItem[];

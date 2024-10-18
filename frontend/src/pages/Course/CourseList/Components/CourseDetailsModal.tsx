@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal, Button, Table } from 'react-bootstrap';
-import { Course, ScheduleItem } from '../../Course.interface';
+import { Course, ScheduleItem } from '../../../../interfaces/Course.interface';
 import './CourseDetailsModal.css'; // Make sure to create this CSS file
 
 interface CourseDetailsModalProps {

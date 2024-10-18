@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { Course } from '../../Course.interface';
+import { Course } from '../../../../interfaces/Course.interface';
 
 interface CourseTableProps {
   courses: Course[];

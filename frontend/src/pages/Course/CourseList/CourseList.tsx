@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Alert } from 'react-bootstrap';
-import axios from 'axios';
-import { Course } from '../Course.interface';
+import { Course } from '../../../interfaces/Course.interface';
+import { fetchCourses, deleteCourse } from '../../../utils/api';
 import FilterBar from './Components/FilterBar';
 import CourseTable from './Components/CourseTable';
 import CourseDetailsModal from './Components/CourseDetailsModal';
-const token = localStorage.getItem('authToken');
 
 const CourseList: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -20,20 +19,16 @@ const CourseList: React.FC = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   useEffect(() => {
-    fetchCourses();
+    fetchCourseData();
   }, []);
 
   useEffect(() => {
     filterAndSortCourses();
   }, [courses, departmentFilter, termFilter, yearFilter, sortBy, sortOrder]);
 
-  const fetchCourses = async () => {
+  const fetchCourseData = async () => {
     try {
-      const response = await axios.get<Course[]>('http://localhost:3000/api/courses', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await fetchCourses();
       setCourses(response.data);
     } catch (error) {
       console.error('Error fetching courses:', error);
@@ -70,12 +65,8 @@ const CourseList: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:3000/api/courses/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      fetchCourses();
+      await deleteCourse(id);
+      fetchCourseData();
     } catch (error) {
       console.error('Error deleting course:', error);
       setError('Failed to delete course. Please try again.');

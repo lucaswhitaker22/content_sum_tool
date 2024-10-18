@@ -1,6 +1,6 @@
 import React from 'react';
 import { Form, Row, Col } from 'react-bootstrap';
-import { Course } from '../../Course.interface';
+import { Course } from '../../../../interfaces/Course.interface';
 
 interface CourseBasicInfoProps {
   course: Course;

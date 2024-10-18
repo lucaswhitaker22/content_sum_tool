@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
-import { Lecture } from '../Lecture.interface';
+import { Lecture } from '../../../interfaces/Lecture.interface';
 import {LectureNotes, LectureHeader, LecturePractice, LectureKeywords, LectureReview} from './LectureView.components';
 import  {PrintButton} from '../LecturePrint/PrintButton';
 

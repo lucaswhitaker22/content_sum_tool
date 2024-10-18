@@ -5,10 +5,8 @@ import LectureList from './pages/Lecture/LectureList/LectureList';
 import LectureView from './pages/Lecture/LectureView/LectureView';
 import Login from './pages/User/LoginPage';
 import LectureAdd from './pages/Lecture/LectureAdd/LectureAdd';
-import LectureEdit from './pages/Lecture/LectureAdd/LectureEdit';
 import CourseAdd from './pages/Course/CourseAdd/CourseAdd';
 import CourseList from './pages/Course/CourseList/CourseList'
-import CourseEdit from './pages/Course/CourseAdd/CourseEdit';
 import AuthSuccess from './pages/User/AuthSuccess';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -96,12 +94,10 @@ const App: React.FC = () => {
         <Route path="/lectures" element={<LectureList />} />
         <Route path="/lecture/:id" element={<LectureView />} />
         <Route path="/lecture/add" element={<LectureAdd />} />
-        <Route path="/lecture/edit/:id" element={<LectureEdit />} />
         <Route path="/login" element={<Login/>} />
         <Route path="/auth-success" element={<AuthSuccess />} />
         <Route path="/course/add" element={<CourseAdd/>} />
         <Route path="/course/list" element={<CourseList/>} />
-        <Route path="/course/edit/:id" element={<CourseEdit />} />
       </Routes>
     </Router>
   );

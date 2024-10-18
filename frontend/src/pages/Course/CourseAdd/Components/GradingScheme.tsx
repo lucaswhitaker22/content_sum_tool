@@ -1,6 +1,6 @@
 import React from 'react';
 import { Table, Button, Form } from 'react-bootstrap';
-import { GradingSchemeItem } from '../../Course.interface';
+import { GradingSchemeItem } from '../../../../interfaces/Course.interface';
 
 interface GradingSchemeProps {
   gradingScheme: GradingSchemeItem[];
